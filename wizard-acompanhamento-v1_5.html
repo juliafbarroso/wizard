@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wizard de Acompanhamento de Processo (v1) — Antecipação · JusCash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Protótipo clicável — Wizard de Acompanhamento (v1, antecipação)
+   Origem (lista + envio) → acompanhamento com ações funcionando.
+   Estilo HeroUI · Fonte Figtree · Cores JusCash · Dados simulados.
+   ============================================================ */
+:root{
+  --primary-50:#AAFFBE; --primary-100:#8AF3A3; --primary-500:#009C46;
+  --primary-600:#008633; --primary-700:#007122; --primary-800:#005C12;
+  --secondary-500:#136CE2; --secondary-600:#105ABC;
+  --n-50:#FAFAFA; --n-100:#F5F5F5; --n-200:#E5E5E5; --n-300:#D4D4D4;
+  --n-400:#A3A3A3; --n-500:#6D6D6E; --n-600:#525252; --n-700:#404040;
+  --n-800:#262626; --n-900:#171717;
+  --green-50:#C9FFD6; --green-500:#1E7E34; --green-900:#065F1B;
+  --red-50:#FEF2EC; --red-500:#D2190B; --red-900:#9D231C;
+  --yellow-50:#FFFBE0; --yellow-500:#867400; --yellow-900:#675413;
+  --blue-50:#ECF5FE; --blue-500:#207AC3; --blue-900:#1D4F79;
+  --orange-50:#FFE9D2; --orange-500:#B15600;
+  --text-dark:#262626; --text-soft:#6D6D6E; --text-disabled:#A3A3A3;
+  --link:#207AC3; --link-hover:#1D4F79;
+  --bg-white:#FAFAFA; --bg-grey:#F5F5F5; --border:#D4D4D4;
+  --r-sm:8px; --r-md:12px; --r-lg:14px; --r-xl:18px; --r-full:9999px;
+  --shadow-xs:0 1px 2px rgba(23,23,23,.06);
+  --shadow-sm:0 2px 8px rgba(23,23,23,.08);
+  --shadow-md:0 8px 24px rgba(23,23,23,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text-dark);background:var(--n-200);-webkit-font-smoothing:antialiased;line-height:1.45}
+
+/* ---------- Barra de revisão compacta (1 linha) ---------- */
+.review-bar{position:sticky;top:0;z-index:50;background:var(--n-900);color:var(--n-100);padding:7px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #000}
+.rb-title{font-weight:700;font-size:11.5px;white-space:nowrap;flex-shrink:0}
+.rb-title span{font-weight:400;color:var(--n-400)}
+.rb-strip{display:flex;align-items:center;gap:6px;overflow-x:auto;flex:1;padding-bottom:2px}
+.rb-strip::-webkit-scrollbar{height:5px}
+.rb-strip::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:9px}
+.rb-glabel{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#7d7d7d;font-weight:700;white-space:nowrap;padding:0 2px 0 8px;flex-shrink:0}
+.rb-glabel:first-child{padding-left:0}
+.rb-pill{background:#2b2b2b;color:var(--n-100);border:1px solid #3a3a3a;border-radius:var(--r-full);padding:4px 10px;font-size:11px;cursor:pointer;transition:.12s;white-space:nowrap;font-weight:500;flex-shrink:0}
+.rb-pill:hover{background:#3a3a3a}
+.rb-pill.active{background:var(--primary-600);border-color:var(--primary-500);color:#fff;font-weight:700}
+.rb-pill.flow{border-color:var(--secondary-500)}
+.rb-pill.cond{border-style:dashed;border-color:var(--yellow-500)}
+.rb-pill.final{border-color:var(--red-900)}
+.rb-nav{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.rb-nav button{background:#2b2b2b;color:#fff;border:1px solid #3a3a3a;border-radius:var(--r-sm);padding:5px 10px;font-size:13px;line-height:1;cursor:pointer;font-weight:700;font-family:inherit}
+.rb-nav button:hover{background:#3a3a3a}
+
+/* ---------- App shell ---------- */
+.app{display:flex;min-height:calc(100vh - 44px);max-width:1440px;margin:0 auto;background:var(--bg-white)}
+.sidebar{width:264px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 14px}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
+.brand .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--primary-600),var(--primary-800));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px}
+.brand .bt b{font-size:15px;color:var(--text-dark);font-weight:800}
+.brand .bt small{display:block;font-size:11px;color:var(--text-soft)}
+.side-cta{margin:0 4px 16px;background:var(--primary-600);color:#fff;border:none;border-radius:var(--r-sm);padding:11px 12px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;font-family:inherit}
+.side-cta:hover{background:var(--primary-800)}
+.side-menu{display:flex;flex-direction:column;gap:2px}
+.side-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r-sm);color:var(--text-soft);font-size:13.5px;font-weight:600;cursor:pointer}
+.side-item .ic{width:18px;height:18px;opacity:.75}
+.side-item:hover{background:var(--n-100)}
+.side-item.active{background:var(--primary-50);color:var(--primary-800)}
+.side-spacer{flex:1}
+.side-foot{border-top:1px solid var(--n-200);padding-top:14px;margin-top:14px}
+
+/* ---------- Conteúdo ---------- */
+.content{flex:1;min-width:0;padding:26px 34px 70px;background:var(--bg-white);overflow:auto}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-soft);margin-bottom:16px}
+.breadcrumb b{color:var(--text-dark)}
+.breadcrumb .sep{color:var(--n-400)}
+.breadcrumb .lnk{color:var(--link);cursor:pointer}
+.breadcrumb .lnk:hover{text-decoration:underline}
+
+.page-h{margin-bottom:20px}
+.page-h h1{font-size:24px;font-weight:800}
+.page-h p{font-size:13.5px;color:var(--text-soft);max-width:640px;margin-top:4px}
+.page-h-row{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+
+/* proc-head (wizard) */
+.proc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;background:#fff;border:1px solid var(--n-200);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow-xs);margin-bottom:22px}
+.proc-head h1{font-size:19px;font-weight:800;margin-bottom:6px}
+.proc-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--text-soft)}
+.proc-meta b{color:var(--text-dark);font-weight:600}
+.help-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--secondary-600);border:1.5px solid var(--secondary-600);border-radius:var(--r-full);padding:9px 15px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.help-btn:hover{background:var(--blue-50)}
+
+/* stepper */
+.journey{background:#fff;border:1px solid var(--n-200);border-radius:var(--r-lg);padding:22px 20px 18px;box-shadow:var(--shadow-xs);margin-bottom:12px}
+.journey-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.journey-top h2{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text-soft)}
+.journey-top .jt-right{font-size:12px;color:var(--text-soft)}
+.stepper{display:flex;align-items:flex-start}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;min-width:0}
+.step .dot{width:30px;height:30px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;z-index:2;border:2px solid var(--n-300);background:#fff;color:var(--n-400)}
+.step .lbl{font-size:11px;margin-top:8px;text-align:center;color:var(--n-400);font-weight:600;padding:0 2px;line-height:1.2}
+.step .bar{position:absolute;top:14px;left:50%;width:100%;height:3px;background:var(--n-200);z-index:1}
+.step:last-child .bar{display:none}
+.step.done .dot{background:var(--primary-600);border-color:var(--primary-600);color:#fff}
+.step.done .bar{background:var(--primary-600)}
+.step.done .lbl{color:var(--text-soft)}
+.step.current .dot{background:#fff;border-color:var(--primary-600);color:var(--primary-700);box-shadow:0 0 0 4px var(--primary-50)}
+.step.current .lbl{color:var(--primary-800);font-weight:800}
+.step.fail .dot{background:var(--red-500);border-color:var(--red-500);color:#fff}
+.step.fail .lbl{color:var(--red-900);font-weight:800}
+
+/* status card */
+.status-card{background:#fff;border:1px solid var(--n-200);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:16px}
+.sc-accent{height:5px;width:100%}
+.sc-body{padding:24px 26px}
+.sc-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.badge{display:inline-flex;align-items:center;gap:7px;border-radius:var(--r-full);padding:5px 13px;font-size:12.5px;font-weight:700;line-height:1}
+.badge .bdot{width:8px;height:8px;border-radius:var(--r-full);background:currentColor}
+.badge.info{background:var(--blue-50);color:var(--blue-900)}
+.badge.wait{background:var(--yellow-50);color:var(--yellow-900)}
+.badge.action{background:var(--orange-50);color:var(--orange-500)}
+.badge.success{background:var(--green-50);color:var(--green-900)}
+.badge.error{background:var(--red-50);color:var(--red-900)}
+.badge.neutral{background:var(--n-100);color:var(--n-600)}
+.cond-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--yellow-900);background:var(--yellow-50);border:1px dashed var(--yellow-500);padding:4px 10px;border-radius:var(--r-full)}
+.sc-title{font-size:22px;font-weight:800;margin:10px 0 4px}
+.sc-prazo{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-soft);margin-bottom:14px}
+.sc-prazo .clock{width:15px;height:15px}
+.sc-desc{font-size:15px;color:var(--n-700);max-width:640px;margin-bottom:4px}
+
+/* ação */
+.action{margin-top:22px;border-top:1px solid var(--n-200);padding-top:20px}
+.action h3{font-size:14px;font-weight:800;margin-bottom:4px}
+.action p.sub{font-size:13px;color:var(--text-soft);margin-bottom:14px;max-width:600px}
+.btn{display:inline-flex;align-items:center;gap:9px;border-radius:var(--r-sm);padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;border:1.5px solid transparent;font-family:inherit;transition:.12s}
+.btn svg{width:17px;height:17px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--primary-600);color:#fff}
+.btn-primary:not(:disabled):hover{background:var(--primary-800)}
+.btn-outline{background:#fff;color:var(--text-dark);border-color:var(--border)}
+.btn-outline:hover{background:var(--n-100)}
+.btn-ghost{background:transparent;color:var(--text-soft)}
+.btn-ghost:hover{background:var(--n-100)}
+.btn-danger-o{background:#fff;color:var(--red-900);border-color:var(--red-500)}
+.btn-danger-o:hover{background:var(--red-50)}
+.btn-sm{padding:8px 14px;font-size:13px}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+.dropzone{border:2px dashed var(--n-300);border-radius:var(--r-md);background:var(--n-50);padding:26px;text-align:center;color:var(--text-soft);max-width:560px;display:block;cursor:pointer;transition:.12s}
+.dropzone:hover{border-color:var(--primary-600);background:#fff}
+.dropzone .up-ic{width:30px;height:30px;margin:0 auto 8px;color:var(--n-400)}
+.dropzone b{color:var(--link);font-weight:700}
+.dropzone .hint{font-size:11.5px;color:var(--n-400);margin-top:6px}
+.filechip{display:inline-flex;align-items:center;gap:10px;background:var(--green-50);border:1px solid #a9edbb;color:var(--green-900);border-radius:var(--r-sm);padding:9px 13px;font-size:13px;font-weight:600;max-width:560px;margin-top:4px}
+.filechip svg{width:16px;height:16px;flex-shrink:0}
+.filechip span:not(.x){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filechip .x{margin-left:auto;cursor:pointer;color:var(--green-900);opacity:.6;font-weight:800;flex-shrink:0}
+.filechip .x:hover{opacity:1}
+.bigcheck svg{width:30px;height:30px}
+
+.field{max-width:460px;margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px}
+.field .req{color:var(--red-500)}
+.field input,.field textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;font-size:14px;font-family:inherit;color:var(--text-dark);background:#fff}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--primary-600);box-shadow:0 0 0 3px var(--primary-50)}
+.field.err input{border-color:var(--red-500);box-shadow:0 0 0 3px var(--red-50)}
+.field .msg{font-size:12px;color:var(--red-900);margin-top:6px;display:none}
+.field.err .msg{display:block}
+.or-sep{display:flex;align-items:center;gap:12px;color:var(--n-400);font-size:12px;font-weight:700;margin:16px 0;max-width:560px}
+.or-sep::before,.or-sep::after{content:"";height:1px;background:var(--n-200);flex:1}
+
+/* radios / toggles */
+.radiorow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.rchip{border:1.5px solid var(--n-200);border-radius:var(--r-sm);padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;background:#fff}
+.rchip:hover{border-color:var(--primary-600)}
+.rchip.sel{border-color:var(--primary-600);background:var(--primary-50);color:var(--primary-800)}
+.toggle{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px}
+.toggle .tk{width:40px;height:22px;border-radius:var(--r-full);background:var(--n-300);position:relative;transition:.15s;flex-shrink:0}
+.toggle .tk::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:var(--r-full);background:#fff;transition:.15s}
+.toggle.on .tk{background:var(--primary-600)}
+.toggle.on .tk::after{left:20px}
+
+/* proposta */
+.proposal{border:1px solid var(--n-200);border-radius:var(--r-md);overflow:hidden;max-width:560px;background:#fff}
+.proposal .p-top{background:var(--primary-50);padding:18px 20px;border-bottom:1px solid var(--primary-100)}
+.proposal .p-top small{font-size:12px;color:var(--primary-800);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.proposal .p-top .val{font-size:30px;font-weight:800;color:var(--primary-800);margin-top:2px}
+.proposal .p-rows{padding:6px 20px}
+.p-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--n-100);font-size:13.5px}
+.p-row:last-child{border-bottom:none}
+.p-row span{color:var(--text-soft)} .p-row b{font-weight:700}
+.p-note{font-size:12px;color:var(--text-soft);padding:0 20px 16px;display:flex;gap:7px;align-items:flex-start}
+
+.checklist{list-style:none;max-width:560px;margin-bottom:16px}
+.checklist li{display:flex;gap:11px;padding:11px 13px;border:1px solid var(--n-200);border-radius:var(--r-sm);margin-bottom:8px;font-size:13.5px;align-items:center;background:#fff}
+.checklist li .num{width:22px;height:22px;border-radius:var(--r-full);background:var(--n-100);color:var(--n-600);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.doc-item{display:flex;justify-content:space-between;align-items:center}
+.doc-item .st{font-size:11.5px;color:var(--yellow-900);font-weight:700}
+
+.alert{display:flex;gap:12px;border-radius:var(--r-md);padding:14px 16px;max-width:600px;margin-bottom:16px;font-size:13.5px}
+.a-ic{flex-shrink:0;width:20px;height:20px}
+.p-note .a-ic{width:16px;height:16px}
+.alert svg{width:20px;height:20px;flex-shrink:0}
+.alert.error{background:var(--red-50);border:1px solid #f3c9c2;color:var(--red-900)}
+.alert.info{background:var(--blue-50);border:1px solid #cfe4f7;color:var(--blue-900)}
+.alert.success{background:var(--green-50);border:1px solid #a9edbb;color:var(--green-900)}
+.alert b{font-weight:800}
+
+.slots{display:flex;flex-direction:column;gap:9px;max-width:520px;margin-bottom:16px}
+.slot{display:flex;align-items:center;gap:12px;border:1.5px solid var(--n-200);border-radius:var(--r-sm);padding:13px 15px;cursor:pointer;font-size:14px;background:#fff}
+.slot:hover{border-color:var(--primary-600);background:var(--n-50)}
+.slot.sel{border-color:var(--primary-600);box-shadow:0 0 0 3px var(--primary-50)}
+.slot .radio{width:18px;height:18px;border-radius:var(--r-full);border:2px solid var(--n-300);flex-shrink:0;position:relative}
+.slot.sel .radio{border-color:var(--primary-600)}
+.slot.sel .radio::after{content:"";position:absolute;inset:3px;border-radius:var(--r-full);background:var(--primary-600)}
+.slot b{font-weight:700} .slot span{color:var(--text-soft);font-size:12.5px}
+
+.result{display:flex;gap:16px;align-items:center;background:var(--green-50);border:1px solid #a9edbb;border-radius:var(--r-md);padding:18px 20px;max-width:520px;margin-bottom:16px}
+.result .r-ic{width:40px;height:40px;border-radius:var(--r-full);background:var(--green-500);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.result .r-ic svg{width:22px;height:22px}
+.result .val{font-size:26px;font-weight:800;color:var(--green-900)}
+.result small{color:var(--green-900);font-weight:600;font-size:12px}
+
+/* painel de simulação (protótipo) */
+.sim{margin-top:20px;border:1px dashed var(--n-300);border-radius:var(--r-md);background:var(--n-50);padding:14px 16px;max-width:600px}
+.sim .sim-h{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-soft);font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.sim .sim-h svg{width:15px;height:15px;flex-shrink:0;color:var(--n-500)}
+.sim .sim-h .tag{background:var(--n-800);color:#fff;border-radius:var(--r-full);padding:2px 8px;font-size:9px;letter-spacing:.4px}
+
+/* ajuda persistente */
+.help-card{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--n-200);border-radius:var(--r-lg);padding:16px 20px;box-shadow:var(--shadow-xs);margin-top:16px}
+.help-card .hc-ic{width:42px;height:42px;border-radius:var(--r-full);background:var(--blue-50);color:var(--blue-500);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
+.help-card .hc-tx{flex:1}
+.help-card .hc-tx b{font-size:14px;font-weight:800;display:block}
+.help-card .hc-tx small{font-size:12.5px;color:var(--text-soft)}
+
+/* lista de antecipações */
+.tabs2{display:flex;gap:4px;border-bottom:1px solid var(--n-200);margin-bottom:20px}
+.tab2{padding:11px 16px;font-size:13.5px;font-weight:700;color:var(--text-soft);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab2:hover{color:var(--text-dark)}
+.tab2.sel{color:var(--primary-800);border-bottom-color:var(--primary-600)}
+.pcards{display:flex;flex-direction:column;gap:12px;max-width:820px}
+.pcard{display:flex;align-items:center;gap:18px;background:#fff;border:1px solid var(--n-200);border-radius:var(--r-lg);padding:16px 20px;box-shadow:var(--shadow-xs);cursor:pointer;transition:.12s}
+.pcard:hover{box-shadow:var(--shadow-md);border-color:var(--n-300)}
+.pcard .pc-main{flex:1;min-width:0}
+.pcard .pc-num{font-size:15px;font-weight:800}
+.pcard .pc-meta{font-size:12.5px;color:var(--text-soft);margin-top:2px}
+.pcard .pc-status{font-size:12px;color:var(--text-soft);margin-top:8px;display:flex;align-items:center;gap:7px}
+.pcard .chev{color:var(--n-400);font-size:20px}
+
+/* modal */
+.modal-ov{position:fixed;inset:0;background:rgba(23,23,23,.35);z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:#fff;border-radius:var(--r-xl);max-width:460px;width:100%;box-shadow:var(--shadow-md);overflow:hidden}
+.modal .m-body{padding:26px}
+.modal h3{font-size:19px;font-weight:800;margin-bottom:8px}
+.modal p{font-size:14px;color:var(--n-700);margin-bottom:20px}
+.modal .m-foot{display:flex;gap:12px;justify-content:flex-end}
+
+/* toast */
+.toast-wrap{position:fixed;right:20px;bottom:20px;z-index:90;display:flex;flex-direction:column;gap:10px}
+.toast{display:flex;align-items:flex-start;gap:11px;background:#fff;border:1px solid var(--n-200);border-left:4px solid var(--primary-600);border-radius:var(--r-md);padding:13px 16px;box-shadow:var(--shadow-md);max-width:360px;font-size:13.5px;animation:tin .2s ease}
+.toast .t-ic{color:var(--primary-600);flex-shrink:0;width:20px;height:20px}
+.toast b{font-weight:800;display:block}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* chat (assistente Cashito) */
+.chat-ov{position:fixed;inset:0;background:rgba(23,23,23,.35);z-index:85;display:none}
+.chat-ov.open{display:block}
+.chat{position:fixed;top:0;right:0;height:100%;width:392px;max-width:94vw;background:#fff;box-shadow:var(--shadow-md);z-index:86;display:flex;flex-direction:column;transform:translateX(100%);transition:.22s ease}
+.chat.open{transform:none}
+.chat-head{display:flex;align-items:center;gap:12px;padding:16px 18px;background:var(--primary-600);color:#fff}
+.chat-head .av{width:38px;height:38px;border-radius:var(--r-full);background:#fff;color:var(--primary-700);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0}
+.chat-head b{font-size:15px;font-weight:800;display:block;line-height:1.15}
+.chat-head small{font-size:11.5px;opacity:.9}
+.chat-head .cx{margin-left:auto;cursor:pointer;font-size:18px;opacity:.9;background:none;border:none;color:#fff;font-weight:700}
+.chat-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:11px;background:var(--n-50)}
+.msg{max-width:82%;padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.45}
+.msg.bot{background:#fff;border:1px solid var(--n-200);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.user{background:var(--primary-600);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-sugg{display:flex;flex-direction:column;gap:8px;margin-top:2px}
+.sugg{align-self:flex-start;background:#fff;border:1.5px solid var(--primary-600);color:var(--primary-800);border-radius:var(--r-full);padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;text-align:left;line-height:1.3}
+.sugg:hover{background:var(--primary-50)}
+.sugg.human{border-color:var(--n-300);color:var(--text-soft)}
+.sugg.human:hover{background:var(--n-100)}
+.chat-foot{padding:12px;display:flex;gap:8px;align-items:center;background:#fff;border-top:1px solid var(--n-200)}
+.chat-foot input{flex:1;border:1.5px solid var(--border);border-radius:var(--r-full);padding:10px 15px;font-size:13.5px;font-family:inherit}
+.chat-foot input:focus{outline:none;border-color:var(--primary-600);box-shadow:0 0 0 3px var(--primary-50)}
+.chat-foot .sendb{width:40px;height:40px;border-radius:var(--r-full);background:var(--primary-600);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-foot .sendb svg{width:18px;height:18px}
+.chat-note{font-size:10.5px;color:var(--text-soft);text-align:center;padding:0 12px 10px;background:#fff}
+
+.ph{color:var(--n-400)}
+@media (max-width:900px){.sidebar{display:none}.content{padding:18px}.step .lbl{font-size:9px}}
+</style>
+</head>
+<body>
+
+<div class="review-bar">
+  <div class="rb-title">Protótipo · Wizard v1<span> · dados simulados</span></div>
+  <div class="rb-strip" id="rb-strip"></div>
+  <div class="rb-nav">
+    <button onclick="prevNav()" title="Anterior">‹</button>
+    <button onclick="nextNav()" title="Próximo">›</button>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">J</div><div class="bt"><b>Financeiro</b><small>por JusCash</small></div></div>
+    <button class="side-cta" onclick="goto('envio')">＋ Nova antecipação</button>
+    <nav class="side-menu">
+      <div class="side-item" onclick="goto('lista')"><span class="ic">🏠</span> Início</div>
+      <div class="side-item active" onclick="goto('lista')"><span class="ic">📄</span> Antecipações</div>
+      <div class="side-item"><span class="ic">📁</span> Carteira</div>
+      <div class="side-item"><span class="ic">❓</span> Ajuda</div>
+    </nav>
+    <div class="side-spacer"></div>
+    <div class="side-foot side-menu">
+      <div class="side-item"><span class="ic">⚙️</span> Configurações</div>
+      <div class="side-item"><span class="ic">👤</span> Minha conta</div>
+    </div>
+  </aside>
+  <main class="content" id="content"></main>
+</div>
+
+<div class="modal-ov" id="modal-ov"><div class="modal" id="modal"></div></div>
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<div class="chat-ov" id="chat-ov" onclick="closeChat()"></div>
+<aside class="chat" id="chat">
+  <div class="chat-head">
+    <div class="av">C</div>
+    <div><b>Cashito</b><small>Assistente da JusCash</small></div>
+    <button class="cx" onclick="closeChat()">✕</button>
+  </div>
+  <div class="chat-body" id="chat-body"></div>
+  <div class="chat-foot">
+    <input id="chat-input" type="text" placeholder="Escreva sua dúvida..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="sendb" onclick="sendChat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
+  </div>
+</aside>
+
+<script>
+/* ================= Ícones ================= */
+const ic={
+  clock:'<svg class="clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  up:'<svg class="up-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 20h16"/></svg>',
+  ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>',
+  send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>',
+  alert:'<svg class="a-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>',
+  info:'<svg class="a-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+};
+const STEPS=["Recebido","Análise","Proposta","Contrato","Assinatura","Depósito","Concluído"];
+
+/* ================= Estado global ================= */
+let uploads={};      // arquivos anexados por chave
+let envio={ cred:null, segredo:false, cashback:false };
+let sessao={ slot:0, confirmado:false };
+
+/* ================= Ações genéricas ================= */
+function toast(title,msg){
+  const w=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className='toast';
+  t.innerHTML=`<span class="t-ic">${ic.check}</span><div><b>${title}</b>${msg?`<span>${msg}</span>`:''}</div>`;
+  w.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s';setTimeout(()=>t.remove(),300);},3200);
+}
+function onFile(key){
+  const inp=document.getElementById('f_'+key);
+  if(inp.files&&inp.files.length){
+    uploads[key]=[...inp.files].map(f=>f.name);
+    render();
+  }
+}
+function clearFile(key){ delete uploads[key]; render(); }
+
+function openModal(html){document.getElementById('modal').innerHTML=html;document.getElementById('modal-ov').classList.add('open');}
+function closeModal(){document.getElementById('modal-ov').classList.remove('open');}
+
+/* transições */
+function submitUpload(key,target,tTitle,tMsg){
+  if(!uploads[key]){return;}
+  toast(tTitle,tMsg); goto(target);
+}
+function act(target,tTitle,tMsg){ if(tTitle)toast(tTitle,tMsg); goto(target); }
+
+function confirmRecusa(){
+  openModal(`<div class="m-body">
+    <h3>Recusar a proposta?</h3>
+    <p>Ao recusar, a negociação é encerrada. Você ainda poderá reenviar o processo depois, se quiser.</p>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Voltar</button>
+      <button class="btn btn-danger-o btn-sm" onclick="closeModal();act('encerrada','Proposta recusada','A negociação foi encerrada.')">Recusar proposta</button>
+    </div></div>`);
+}
+function openSign(){
+  openModal(`<div class="m-body">
+    <h3>Plataforma de assinatura</h3>
+    <p>Você está sendo direcionado para a plataforma de assinatura externa, com segurança. Ao concluir a assinatura, você volta para o acompanhamento.</p>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal();act('protocolo','Contrato assinado','Agora protocole as vias e envie o comprovante.')">Simular assinatura concluída</button>
+    </div></div>`);
+}
+function confirmarSessao(){ sessao.confirmado=true; toast('Horário confirmado','O link da chamada foi gerado e enviado a você.'); render(); }
+
+/* envio do processo */
+function setCred(c){ envio.cred=c; render(); }
+function toggleSegredo(){ envio.segredo=!envio.segredo; render(); }
+function toggleCashback(){ envio.cashback=!envio.cashback; render(); }
+function submitEnvio(){
+  const f=document.getElementById('num_proc');
+  const digits=(f.value||'').replace(/\D/g,'');
+  const wrap=document.getElementById('field_num');
+  if(digits.length<20){ wrap.classList.add('err'); f.focus(); return; }
+  if(!envio.cred){ toast('Selecione o crédito','Escolha qual crédito deseja antecipar.'); return; }
+  wrap.classList.remove('err');
+  goto('enviado');
+}
+
+/* ================= Telas de origem ================= */
+function screenLista(){
+  const rows=[
+    {num:'1002411-16.2023.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Em andamento · Proposta disponível',badge:'success',go:'proposta'},
+    {num:'0005582-90.2022.5.02.0004',trib:'TRT-2',cred:'Crédito do autor',st:'Em andamento · Aguardando sua assinatura',badge:'action',go:'assinatura'},
+    {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Concluída · Pagamento realizado',badge:'success',go:'concluido'},
+    {num:'0009921-33.2020.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Perdida · Negociação encerrada',badge:'neutral',go:'encerrada'},
+  ];
+  return `
+  <div class="page-h page-h-row">
+    <div><h1>Antecipações</h1><p>Acompanhe aqui suas antecipações de honorários com a JusCash, do envio do processo até o pagamento.</p></div>
+    <button class="btn btn-primary" onclick="goto('envio')">＋ Enviar processo</button>
+  </div>
+  <div class="pcards">
+    ${rows.map(r=>`
+      <div class="pcard" onclick="goto('${r.go}')">
+        <div class="pc-main">
+          <div class="pc-num">Processo nº ${r.num}</div>
+          <div class="pc-meta">${r.trib} · ${r.cred}</div>
+          <div class="pc-status"><span class="badge ${r.badge}" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>${r.st}</span></div>
+        </div>
+        <div class="chev">›</div>
+      </div>`).join('')}
+  </div>
+  <div class="help-card" style="max-width:820px">
+    <div class="hc-ic">💬</div>
+    <div class="hc-tx"><b>Precisa de ajuda?</b><small>Tire dúvidas sobre antecipação, prazos e o andamento dos seus processos.</small></div>
+    <button class="btn btn-outline" onclick="openChat()">Tirar dúvidas</button>
+  </div>`;
+}
+
+function screenEnvio(){
+  const creds=['Honorários','Crédito do autor','Ambos'];
+  return `
+  <div class="breadcrumb"><span class="lnk" onclick="goto('lista')">Antecipações</span> <span class="sep">/</span> <b>Enviar processo</b></div>
+  <div class="page-h"><h1>Enviar processo para análise</h1><p>Informe o processo que deseja antecipar. A análise de viabilidade é gratuita.</p></div>
+  <div class="status-card"><div class="sc-body" style="padding:26px">
+    <div class="field" id="field_num">
+      <label>Número do processo <span class="req">*</span></label>
+      <input id="num_proc" type="text" placeholder="0000000-00.0000.0.00.0000" value="1002411-16.2023.8.26.0100">
+      <div class="msg">Informe um número de processo válido (padrão CNJ, 20 dígitos).</div>
+    </div>
+    <div class="field">
+      <label>Qual crédito você deseja antecipar? <span class="req">*</span></label>
+      <div class="radiorow">
+        ${creds.map(c=>`<div class="rchip ${envio.cred===c?'sel':''}" onclick="setCred('${c}')">${c}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field">
+      <label>Processo em segredo de justiça?</label>
+      <div class="toggle ${envio.segredo?'on':''}" onclick="toggleSegredo()"><span class="tk"></span><span>${envio.segredo?'Sim':'Não'}</span></div>
+    </div>
+    ${envio.segredo?`
+    <div class="field" style="max-width:560px">
+      <label>Acesso ao processo <span class="req">*</span></label>
+      <p style="font-size:12.5px;color:var(--text-soft);margin:-2px 0 10px">Como o processo está em segredo de justiça, precisamos do acesso para analisar. Envie a chave de acesso ou anexe uma cópia do processo. Basta uma das opções.</p>
+      <input type="text" placeholder="Cole aqui a chave de acesso">
+      <div class="or-sep">ou</div>
+      <label class="dropzone" for="f_envio">${ic.up}<div>Arraste a cópia do processo ou <b>clique para selecionar</b></div><div class="hint">PDF, JPG ou PNG, até 20 MB</div></label>
+      <input id="f_envio" type="file" hidden onchange="onFile('envio')">
+      ${uploads['envio']?`<div class="filechip">${ic.check} <span>${uploads['envio'].join(', ')}</span> <span class="x" onclick="clearFile('envio')">✕</span></div>`:''}
+    </div>`:''}
+    <div class="field" style="max-width:560px">
+      <label>Observações (opcional)</label>
+      <textarea rows="2" placeholder="Algo que devemos saber sobre este processo"></textarea>
+    </div>
+    <div class="field">
+      <label>Solicitar cashback nesta antecipação?</label>
+      <div class="toggle ${envio.cashback?'on':''}" onclick="toggleCashback()"><span class="tk"></span><span>${envio.cashback?'Sim':'Não'}</span></div>
+    </div>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn btn-primary" onclick="submitEnvio()">${ic.send}Enviar para análise</button>
+      <button class="btn btn-ghost" onclick="goto('lista')">Cancelar</button>
+    </div>
+  </div></div>`;
+}
+
+function screenEnviado(){
+  return `
+  <div class="breadcrumb"><span class="lnk" onclick="goto('lista')">Antecipações</span> <span class="sep">/</span> <b>Processo enviado</b></div>
+  <div class="status-card"><div class="sc-accent" style="background:var(--primary-600)"></div><div class="sc-body" style="text-align:center;padding:40px 26px">
+    <div style="width:60px;height:60px;border-radius:var(--r-full);background:var(--green-500);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">${ic.check.replace('width="17"','')}</div>
+    <div class="sc-title" style="justify-content:center">Processo enviado!</div>
+    <div class="sc-desc" style="margin:0 auto 20px">Recebemos o seu processo e ele entrou na fila de análise. O acompanhamento fica disponível abaixo, e o status é atualizado a cada etapa.</div>
+    <div style="max-width:420px;margin:0 auto;text-align:left">
+      <ul class="checklist">
+        <li><span class="num">1</span><span>Análise de viabilidade do processo</span></li>
+        <li><span class="num">2</span><span>Proposta de antecipação para você aceitar</span></li>
+        <li><span class="num">3</span><span>Assinatura, formalização e pagamento</span></li>
+      </ul>
+    </div>
+    <div class="btn-row" style="justify-content:center;margin-top:8px"><button class="btn btn-primary" onclick="goto('recebido')">Acompanhar processo</button></div>
+  </div></div>`;
+}
+
+/* ================= Ações do wizard (interativas) ================= */
+function actProposta(){return `
+  <div class="action">
+    <h3>Sua proposta</h3>
+    <p class="sub">Confira o valor e as condições. Se tiver dúvidas antes de decidir, fale com o assistente.</p>
+    <div class="proposal">
+      <div class="p-top"><small>Valor a receber</small><div class="val">R$ <span class="ph">••.•••,••</span></div></div>
+      <div class="p-rows">
+        <div class="p-row"><span>Crédito antecipado</span><b>Honorários</b></div>
+        <div class="p-row"><span>Forma de pagamento</span><b>PIX, após a assinatura</b></div>
+        <div class="p-row"><span>Prazo de pagamento</span><b>Até 24h após a formalização</b></div>
+        <div class="p-row"><span>Validade da proposta</span><b><span class="ph">•</span> dias</b></div>
+      </div>
+      <div class="p-note">${ic.info}<span>O detalhamento de cálculo, deságio e valores não é exibido nesta tela (fora do escopo da v1).</span></div>
+    </div>
+    <div class="btn-row" style="margin-top:18px">
+      <button class="btn btn-primary" onclick="act('documentos','Proposta aceita','Vamos seguir com a formalização.')">Aceitar proposta</button>
+      <button class="btn btn-danger-o" onclick="confirmRecusa()">Recusar</button>
+    </div>
+  </div>`;}
+
+function actCopia(){const k='acesso';return `
+  <div class="action">
+    <h3>Enviar acesso ao processo</h3>
+    <p class="sub">Envie a chave de acesso ou anexe uma cópia do processo. Basta uma das duas opções.</p>
+    <div class="field"><label>Chave de acesso do processo</label><input type="text" placeholder="Cole aqui a chave de acesso"></div>
+    <div class="or-sep">ou</div>
+    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste a cópia do processo ou <b>clique para selecionar</b></div><div class="hint">PDF ou imagem, até 20 MB</div></label>
+    <input id="f_${k}" type="file" hidden onchange="onFile('${k}')">
+    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}')">✕</span></div>`:''}
+    <div class="btn-row" style="margin-top:18px"><button class="btn btn-primary" onclick="act('analise','Acesso enviado','A análise continua com o acesso ao processo.')">${ic.send}Enviar acesso</button></div>
+  </div>`;}
+
+function actDocs(){const k='docs';return `
+  <div class="action">
+    <h3>Enviar documentos</h3>
+    <p class="sub">Anexe os documentos solicitados para seguir com a formalização. A lista é definida conforme o seu caso.</p>
+    <ul class="checklist">
+      <li class="doc-item"><span><b>Documento solicitado</b> <span class="ph">(ex.: documento de identidade)</span></span><span class="st">${uploads[k]?'Anexado':'Pendente'}</span></li>
+      <li class="doc-item"><span><b>Documento solicitado</b> <span class="ph">(ex.: comprovante de dados)</span></span><span class="st">${uploads[k]?'Anexado':'Pendente'}</span></li>
+    </ul>
+    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste os arquivos ou <b>clique para selecionar</b></div><div class="hint">PDF, JPG ou PNG, até 20 MB por arquivo</div></label>
+    <input id="f_${k}" type="file" hidden multiple onchange="onFile('${k}')">
+    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}')">✕</span></div>`:''}
+    <div class="btn-row" style="margin-top:18px">
+      <button class="btn btn-primary" ${uploads[k]?'':'disabled'} onclick="act('contrato','Documentos enviados','Os dados foram verificados e estão prontos para uso.')">${ic.send}Enviar documentos</button>
+    </div>
+  </div>`;}
+
+function actAssinatura(){return `
+  <div class="action">
+    <h3>Assinar o contrato</h3>
+    <p class="sub">A assinatura é feita em uma plataforma de assinatura externa, com segurança. Ao terminar, você volta para acompanhar o processo aqui.</p>
+    <div class="alert info">${ic.info}<div>Você será direcionado para um site externo (plataforma de assinatura). O acompanhamento continua nesta página.</div></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="openSign()">${ic.ext}Abrir plataforma de assinatura</button></div>
+  </div>`;}
+
+function actProtocolo(){const k='comprov';return `
+  <div class="action">
+    <h3>Protocolar e enviar o comprovante</h3>
+    <p class="sub">Depois de assinar, protocole as vias no seu processo, no sistema do tribunal, e envie o comprovante do protocolo.</p>
+    <ul class="checklist">
+      <li><span class="num">1</span><span>Protocole as vias assinadas do contrato no seu processo, pelo sistema do tribunal.</span></li>
+      <li><span class="num">2</span><span>Salve o comprovante do protocolo (PDF).</span></li>
+      <li><span class="num">3</span><span>Envie o comprovante abaixo para seguirmos para a conferência.</span></li>
+    </ul>
+    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste o comprovante do protocolo ou <b>clique para selecionar</b></div><div class="hint">PDF, até 20 MB</div></label>
+    <input id="f_${k}" type="file" hidden onchange="onFile('${k}')">
+    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}')">✕</span></div>`:''}
+    <div class="btn-row" style="margin-top:18px"><button class="btn btn-primary" ${uploads[k]?'':'disabled'} onclick="act('conferencia','Comprovante enviado','Vamos conferir e liberar o pagamento.')">${ic.send}Enviar comprovante</button></div>
+  </div>`;}
+
+function actAjuste(){const k='comprov2';return `
+  <div class="action">
+    <h3>Corrigir o protocolo</h3>
+    <p class="sub">Veja a pendência apontada na conferência, corrija no seu processo e reenvie o comprovante do protocolo.</p>
+    <div class="alert error">${ic.alert}<div><b>Pendência encontrada:</b> juntou documentos sem assinatura.<br><span style="font-size:13px">Reenvie as vias devidamente assinadas no seu processo e, em seguida, envie o novo comprovante do protocolo.</span></div></div>
+    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste o novo comprovante do protocolo ou <b>clique para selecionar</b></div><div class="hint">PDF, até 20 MB</div></label>
+    <input id="f_${k}" type="file" hidden onchange="onFile('${k}')">
+    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}')">✕</span></div>`:''}
+    <div class="btn-row" style="margin-top:18px"><button class="btn btn-primary" ${uploads[k]?'':'disabled'} onclick="act('conferencia','Novo comprovante enviado','A conferência recomeça com o comprovante corrigido.')">${ic.send}Reenviar comprovante</button></div>
+  </div>`;}
+
+function actSessao(){
+  const slots=[['Ter, 05/08 · 10h00'],['Ter, 05/08 · 15h30'],['Qua, 06/08 · 09h30']];
+  if(sessao.confirmado){return `
+    <div class="action">
+      <h3>Sessão pública agendada</h3>
+      <div class="alert success">${ic.check}<div><b>Horário confirmado: ${slots[sessao.slot][0]}.</b> O link da chamada foi gerado e enviado a você. Entre no horário para a leitura da minuta e a sua assinatura por certificado digital.</div></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="act('deposito','Assinatura da sessão concluída','O pagamento foi liberado.')">${ic.ext}Entrar na chamada e assinar</button><button class="btn btn-ghost" onclick="confirmarSessao()">Reenviar link</button></div>
+    </div>`;}
+  return `
+  <div class="action">
+    <h3>Agendar a sessão pública</h3>
+    <p class="sub">A cessão do seu crédito precisa ser formalizada em uma sessão pública com o tabelionato. Vamos fazer uma chamada para a leitura da minuta e a sua assinatura por certificado digital. Escolha um horário disponível.</p>
+    <div class="slots">
+      ${slots.map((s,i)=>`<label class="slot ${sessao.slot===i?'sel':''}" onclick="sessao.slot=${i};render()"><span class="radio"></span><div><b>${s[0]}</b> <span>· 30 min · por videochamada</span></div></label>`).join('')}
+    </div>
+    <div class="alert info">${ic.info}<div>Depois de confirmar, o link da chamada aparece aqui e é enviado a você. Esta é a única etapa da v1 com contato ativo.</div></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="confirmarSessao()">Confirmar horário</button></div>
+  </div>`;}
+
+function actConcluido(){return `
+  <div class="action">
+    <div class="result"><div class="r-ic">${ic.check}</div><div><div class="val">R$ <span class="ph">••.•••,••</span></div><small>Depositado via PIX em <span class="ph">••/••/••••</span></small></div></div>
+    <div class="btn-row"><button class="btn btn-outline" onclick="toast('Comprovante','Abre o comprovante do pagamento.')">Ver comprovante</button><button class="btn btn-primary" onclick="goto('envio')">Enviar outro processo</button></div>
+  </div>`;}
+
+function actNaoAprovado(){return `
+  <div class="action">
+    <div class="btn-row"><button class="btn btn-primary" onclick="goto('envio')">Enviar outro processo</button><button class="btn btn-outline" onclick="openChat()">Tirar dúvidas</button></div>
+  </div>`;}
+
+function actEncerrada(){return `
+  <div class="action">
+    <h3>O que você pode fazer</h3>
+    <p class="sub">Se ainda quiser antecipar, você pode reenviar este processo ou enviar um novo para uma nova análise.</p>
+    <div class="btn-row"><button class="btn btn-primary" onclick="act('analise','Processo reenviado','Voltou para a fila de análise.')">Reenviar processo</button><button class="btn btn-outline" onclick="goto('envio')">Enviar novo processo</button></div>
+  </div>`;}
+
+/* painel de simulação para etapas de sistema (sem ação do cliente) */
+function sim(title, opts){
+  return `<div class="sim"><div class="sim-h">${ic.play} ${title} <span class="tag">SIMULAÇÃO</span></div>
+    <div class="btn-row">${opts.map(o=>`<button class="btn ${o.v||'btn-outline'} btn-sm" onclick="goto('${o.t}')">${o.l}</button>`).join('')}</div></div>`;
+}
+
+/* ================= Estados do wizard ================= */
+const STATES=[
+  {group:'flow', id:'lista', title:'Lista de Antecipações', render:screenLista},
+  {group:'flow', id:'envio', title:'Enviar processo', render:screenEnvio},
+  {group:'flow', id:'enviado', title:'Processo enviado', render:screenEnviado},
+
+  {group:'happy', id:'recebido', step:0, badge:'info', badgeTxt:'Recebido', accent:'var(--blue-500)',
+    title:'Processo recebido', prazo:'Atualização estimada em até 1 dia útil.',
+    desc:'Recebemos o seu processo e ele entrou na fila de análise. Você não precisa fazer nada agora: vamos avançar para a análise de viabilidade e o status será atualizado aqui.',
+    sim:()=>sim('Avançar o protótipo',[{l:'Iniciar análise',t:'analise',v:'btn-primary'}]) },
+
+  {group:'happy', id:'analise', step:1, badge:'info', badgeTxt:'Em andamento', accent:'var(--blue-500)',
+    title:'Em análise', prazo:'Prazo estimado desta etapa: até 3 dias úteis.',
+    desc:'Estamos analisando a viabilidade do seu processo e as condições para a antecipação. Assim que a análise terminar, o resultado aparece aqui.',
+    sim:()=>sim('Simular resultado da análise',[{l:'Proposta pronta',t:'proposta',v:'btn-primary'},{l:'Pedir acesso ao processo',t:'acesso'},{l:'Não aprovar',t:'nao-aprovado'}]) },
+
+  {group:'cond', id:'acesso', step:1, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true,
+    title:'Aguardando acesso ao processo', prazo:'A análise continua assim que recebermos o acesso.',
+    desc:'Precisamos de uma cópia ou da chave de acesso do seu processo para continuar a análise. Isso acontece quando o processo está em segredo de justiça ou não pôde ser acessado automaticamente.',
+    action:actCopia },
+
+  {group:'happy', id:'proposta', step:2, badge:'success', badgeTxt:'Proposta pronta', accent:'var(--primary-600)',
+    title:'Proposta disponível', prazo:'Responda dentro do prazo de validade para manter a proposta.',
+    desc:'Sua proposta de antecipação está pronta. Confira o valor e as condições e escolha se deseja aceitar ou recusar.',
+    action:actProposta },
+
+  {group:'cond', id:'documentos', step:2, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true,
+    title:'Aguardando seus documentos', prazo:'A formalização continua assim que recebermos os documentos.',
+    desc:'Precisamos dos seus documentos para seguir com a formalização do contrato. Envie os arquivos solicitados abaixo. Se já tivermos os seus documentos, esta etapa é pulada.',
+    action:actDocs },
+
+  {group:'happy', id:'contrato', step:3, badge:'info', badgeTxt:'Em andamento', accent:'var(--blue-500)',
+    title:'Preparando contrato', prazo:'Prazo estimado desta etapa: até 2 dias úteis.',
+    desc:'Estamos preparando o seu contrato com base na proposta aceita. Assim que estiver pronto, você poderá assiná-lo.',
+    sim:()=>sim('Avançar o protótipo',[{l:'Contrato pronto para assinar',t:'assinatura',v:'btn-primary'}]) },
+
+  {group:'happy', id:'assinatura', step:4, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)',
+    title:'Aguardando sua assinatura', prazo:'Assine para seguir para o pagamento.',
+    desc:'Seu contrato está pronto para assinar. A assinatura é feita em uma plataforma de assinatura externa, com segurança.',
+    action:actAssinatura },
+
+  {group:'happy', id:'protocolo', step:4, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)',
+    title:'Aguardando protocolo', prazo:'O pagamento é liberado após a conferência do protocolo.',
+    desc:'Protocole as vias assinadas no seu processo, no sistema do tribunal, e envie o comprovante do protocolo. Precisamos dele para conferir e liberar o pagamento.',
+    action:actProtocolo },
+
+  {group:'happy', id:'conferencia', step:4, badge:'info', badgeTxt:'Em andamento', accent:'var(--blue-500)',
+    title:'Em conferência', prazo:'Prazo estimado desta etapa: até 2 dias úteis.',
+    desc:'Estamos conferindo o seu contrato e o comprovante do protocolo antes de liberar o pagamento. Você não precisa fazer nada agora.',
+    sim:()=>sim('Simular resultado da conferência',[{l:'Liberar pagamento',t:'deposito',v:'btn-primary'},{l:'Pendência no protocolo',t:'ajuste'},{l:'Precisa de sessão pública',t:'sessao'}]) },
+
+  {group:'cond', id:'ajuste', step:4, badge:'action', badgeTxt:'Ação necessária', accent:'var(--red-500)', cond:true,
+    title:'Aguardando ajuste no protocolo', prazo:'A conferência recomeça assim que recebermos o novo comprovante.',
+    desc:'Encontramos uma pendência no protocolo das vias. Veja o que precisa ser corrigido, ajuste no seu processo e reenvie o comprovante do protocolo.',
+    action:actAjuste },
+
+  {group:'cond', id:'sessao', step:4, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true,
+    title:'Aguardando a sessão pública', prazo:'Etapa que depende de agendamento com o tabelionato.',
+    desc:'Seu caso precisa de uma sessão pública para formalizar a cessão. Vamos agendar uma chamada para a leitura da minuta e a sua assinatura. O pagamento é liberado após a sessão.',
+    action:actSessao },
+
+  {group:'happy', id:'deposito', step:5, badge:'info', badgeTxt:'Em andamento', accent:'var(--blue-500)',
+    title:'Depósito em andamento', prazo:'O pagamento costuma ser realizado em até 24h após a liberação.',
+    desc:'Seu pagamento está sendo processado. Assim que o depósito for concluído, você verá a confirmação aqui.',
+    sim:()=>sim('Avançar o protótipo',[{l:'Confirmar pagamento',t:'concluido',v:'btn-primary'}]) },
+
+  {group:'happy', id:'concluido', step:6, badge:'success', badgeTxt:'Concluído', accent:'var(--green-500)',
+    title:'Concluído', prazo:'Antecipação concluída.',
+    desc:'Pagamento realizado e antecipação concluída. Obrigado por usar a JusCash.',
+    action:actConcluido },
+
+  {group:'final', id:'nao-aprovado', step:2, badge:'error', badgeTxt:'Não aprovado', accent:'var(--red-500)', terminal:true, failAt:2,
+    title:'Processo não aprovado', prazo:'Análise encerrada.',
+    desc:'Seu processo não foi aprovado para antecipação nesta análise. Se quiser entender melhor o motivo, fale com o nosso assistente.',
+    action:actNaoAprovado },
+
+  {group:'final', id:'encerrada', step:2, badge:'neutral', badgeTxt:'Encerrada', accent:'var(--n-500)', terminal:true, failAt:2,
+    title:'Negociação encerrada', prazo:'Negociação encerrada.',
+    desc:'Encerramos esta negociação. Isso acontece quando a proposta não é aceita ou quando há desistência. Você ainda pode reenviar o processo ou enviar um novo.',
+    action:actEncerrada },
+];
+const byId=id=>STATES.find(s=>s.id===id);
+
+/* navegação linear (prev/próximo) e fallback para estados fora da linha */
+const ORDER=['lista','envio','enviado','recebido','analise','proposta','documentos','contrato','assinatura','protocolo','conferencia','deposito','concluido'];
+const OFFNAV={acesso:{p:'analise',n:'analise'},ajuste:{p:'conferencia',n:'conferencia'},sessao:{p:'conferencia',n:'deposito'},'nao-aprovado':{p:'analise',n:'envio'},encerrada:{p:'proposta',n:'envio'}};
+
+let current='lista';
+
+function goto(id){ current=id; render(); }
+function nextNav(){
+  const i=ORDER.indexOf(current);
+  if(i>=0){ current=ORDER[Math.min(i+1,ORDER.length-1)]; }
+  else if(OFFNAV[current]){ current=OFFNAV[current].n; }
+  render();
+}
+function prevNav(){
+  const i=ORDER.indexOf(current);
+  if(i>=0){ current=ORDER[Math.max(i-1,0)]; }
+  else if(OFFNAV[current]){ current=OFFNAV[current].p; }
+  render();
+}
+
+/* ================= Render ================= */
+function renderStrip(){
+  const strip=document.getElementById('rb-strip'); strip.innerHTML='';
+  const groups=[['flow','Fluxo'],['happy','Caminho feliz'],['cond','Condicionais'],['final','Finais']];
+  groups.forEach(([g,label])=>{
+    const gl=document.createElement('span'); gl.className='rb-glabel'; gl.textContent=label; strip.appendChild(gl);
+    STATES.filter(s=>s.group===g).forEach(s=>{
+      const p=document.createElement('div');
+      p.className='rb-pill '+(g==='flow'?'flow':'')+(s.cond?' cond':'')+(s.terminal?' final':'')+(s.id===current?' active':'');
+      p.textContent=s.title; p.onclick=()=>goto(s.id);
+      strip.appendChild(p);
+    });
+  });
+}
+
+function renderStepper(s){
+  let h='<div class="stepper">';
+  STEPS.forEach((label,i)=>{
+    let cls='step';
+    if(s.terminal){ if(i<s.failAt)cls+=' done'; else if(i===s.failAt)cls+=' fail'; }
+    else { if(i<s.step)cls+=' done'; else if(i===s.step)cls+=' current'; }
+    const mark=cls.includes('done')?'✓':cls.includes('fail')?'!':(i+1);
+    h+=`<div class="${cls}"><div class="bar"></div><div class="dot">${mark}</div><div class="lbl">${label}</div></div>`;
+  });
+  return h+'</div>';
+}
+
+function renderWizard(s){
+  const jt = s.terminal ? 'Jornada interrompida' : `Etapa ${s.step+1} de ${STEPS.length}`;
+  return `
+  <div class="breadcrumb"><span class="lnk" onclick="goto('lista')">Antecipações</span> <span class="sep">/</span> <b>Processo nº 1002411-16.2023.8.26.0100</b></div>
+  <div class="proc-head">
+    <div>
+      <h1>Acompanhamento da antecipação</h1>
+      <div class="proc-meta"><span>Processo <b>nº 1002411-16.2023.8.26.0100</b></span><span>Tribunal <b>TJSP</b></span><span>Crédito <b>Honorários</b></span><span>Enviado em <b>28/07/2026</b></span></div>
+    </div>
+    <button class="help-btn" onclick="openChat()">💬 Tirar dúvidas</button>
+  </div>
+  <div class="journey">
+    <div class="journey-top"><h2>Sua jornada</h2><div class="jt-right">${jt}${s.cond?' · estado condicional':''}</div></div>
+    ${renderStepper(s)}
+  </div>
+  <div class="status-card">
+    <div class="sc-accent" style="background:${s.accent}"></div>
+    <div class="sc-body">
+      <div class="sc-head">
+        <span class="badge ${s.badge}"><span class="bdot"></span>${s.badgeTxt}</span>
+        ${s.cond?`<span class="cond-tag">◇ Estado condicional</span>`:''}
+        ${s.terminal?`<span class="cond-tag" style="border-color:var(--red-500);color:var(--red-900);background:var(--red-50)">● Estado final</span>`:''}
+      </div>
+      <div class="sc-title">${s.title}</div>
+      <div class="sc-prazo">${ic.clock}${s.prazo}</div>
+      <div class="sc-desc">${s.desc}</div>
+      ${s.action?s.action():''}
+      ${s.sim?s.sim():''}
+    </div>
+  </div>
+  <div class="help-card">
+    <div class="hc-ic">💬</div>
+    <div class="hc-tx"><b>Tem dúvidas sobre esta etapa?</b><small>Fale com o nosso assistente ou veja as perguntas frequentes sobre o seu acompanhamento.</small></div>
+    <button class="btn btn-outline" onclick="openChat()">Tirar dúvidas</button>
+  </div>`;
+}
+
+function render(){
+  const s=byId(current);
+  const content=document.getElementById('content');
+  if(s.group==='flow'){
+    if(s.id==='lista') content.innerHTML=screenLista();
+    else if(s.id==='envio') content.innerHTML=screenEnvio();
+    else content.innerHTML=screenEnviado();
+  } else {
+    content.innerHTML=renderWizard(s);
+  }
+  renderStrip();
+  if(current!==prevId){ window.scrollTo({top:0,behavior:'smooth'}); prevId=current; }
+}
+/* ================= Chat de exemplo (assistente Cashito) ================= */
+const FAQ={
+  _default:[
+    {q:'Como funciona a antecipação?', a:'A antecipação adianta o valor que você tem a receber no processo. A gente analisa a viabilidade, envia uma proposta e, se você aceitar, formaliza e paga.'},
+    {q:'Quanto tempo leva cada etapa?', a:'Cada etapa mostra um prazo estimado no acompanhamento. O tempo total varia conforme o processo e as etapas necessárias.'},
+    {q:'Onde vejo o andamento?', a:'O andamento aparece na tela de acompanhamento da antecipação, com o status atual e o que falta.'},
+  ],
+  acesso:[
+    {q:'Por que vocês precisam de acesso ao processo?', a:'Quando o processo está em segredo de justiça ou não pôde ser acessado automaticamente, precisamos de uma cópia ou da chave de acesso para continuar a análise.'},
+    {q:'O que é a chave de acesso?', a:'É o código que libera a consulta ao processo em segredo de justiça. Você também pode anexar uma cópia do processo no lugar da chave.'},
+  ],
+  proposta:[
+    {q:'O que está incluído na proposta?', a:'A proposta mostra o valor a receber, a forma e o prazo de pagamento e a validade. O detalhamento de cálculo não aparece nesta tela.'},
+    {q:'Posso recusar e reenviar depois?', a:'Pode. Se você recusar, a negociação é encerrada, mas o processo pode ser reenviado para uma nova análise.'},
+  ],
+  documentos:[
+    {q:'Quais documentos preciso enviar?', a:'Os documentos solicitados aparecem na lista da etapa. Eles variam conforme o seu caso.'},
+    {q:'Meus documentos ficam salvos?', a:'A ideia é reaproveitar seus documentos em envios futuros quando possível, para não pedir de novo.'},
+  ],
+  assinatura:[
+    {q:'Onde eu assino o contrato?', a:'A assinatura é feita em uma plataforma de assinatura externa, com segurança. Clique em "Abrir plataforma de assinatura" e, ao terminar, você volta para cá.'},
+    {q:'É seguro assinar por lá?', a:'Sim. A assinatura é feita em uma plataforma especializada, com validade jurídica.'},
+  ],
+  protocolo:[
+    {q:'Como eu protocolo as vias?', a:'Você protocola as vias assinadas no seu processo, pelo sistema do tribunal, e depois envia aqui o comprovante do protocolo em PDF.'},
+    {q:'O que é o comprovante do protocolo?', a:'É o documento gerado pelo sistema do tribunal confirmando que as vias foram juntadas ao processo.'},
+  ],
+  ajuste:[
+    {q:'O que preciso corrigir?', a:'A pendência apontada na conferência aparece na tela. Corrija no seu processo e reenvie o comprovante do protocolo.'},
+  ],
+  sessao:[
+    {q:'O que é a sessão pública?', a:'É uma chamada com o tabelionato para a leitura da minuta e a sua assinatura por certificado digital. É obrigatória em alguns casos e o pagamento sai depois dela.'},
+    {q:'Como escolho o horário?', a:'Você escolhe um dos horários disponíveis na tela. Depois de confirmar, o link da chamada aparece aqui e é enviado a você.'},
+  ],
+  deposito:[
+    {q:'Quando recebo o pagamento?', a:'O pagamento costuma ser realizado em até 24h após a liberação. Você verá a confirmação aqui.'},
+  ],
+  'nao-aprovado':[
+    {q:'Por que o processo não foi aprovado?', a:'A aprovação depende da análise de viabilidade do processo. Posso te encaminhar para um atendente para entender melhor o seu caso.'},
+    {q:'Posso enviar outro processo?', a:'Pode, sim. É só enviar um novo processo para uma nova análise gratuita.'},
+  ],
+  encerrada:[
+    {q:'Posso reabrir a negociação?', a:'A negociação foi encerrada, mas você pode reenviar este processo ou enviar um novo para uma nova análise.'},
+  ],
+};
+let chatMsgs=[];
+function faqFor(){ const s=byId(current); return (s&&FAQ[s.id])?FAQ[s.id]:FAQ._default; }
+function openChat(){
+  const s=byId(current);
+  const ctx=(s&&!['lista','envio','enviado'].includes(s.id))?` Vejo que este processo está em "${s.title}".`:'';
+  chatMsgs=[{who:'bot',t:`Olá! Sou o Cashito, assistente da JusCash.${ctx} Como posso ajudar?`}];
+  renderChat();
+  document.getElementById('chat-ov').classList.add('open');
+  document.getElementById('chat').classList.add('open');
+  setTimeout(()=>{const i=document.getElementById('chat-input'); if(i) i.focus();},250);
+}
+function closeChat(){ document.getElementById('chat-ov').classList.remove('open'); document.getElementById('chat').classList.remove('open'); }
+function askFaq(i){ const f=faqFor()[i]; chatMsgs.push({who:'user',t:f.q}); chatMsgs.push({who:'bot',t:f.a}); renderChat(); }
+function talkHuman(){ chatMsgs.push({who:'user',t:'Falar com um atendente'}); chatMsgs.push({who:'bot',t:'Certo, vou te encaminhar para um atendente da JusCash. É só aguardar um instante.'}); renderChat(); }
+function sendChat(){
+  const inp=document.getElementById('chat-input'); const v=(inp.value||'').trim(); if(!v)return;
+  chatMsgs.push({who:'user',t:v}); inp.value='';
+  chatMsgs.push({who:'bot',t:'Boa pergunta. Neste exemplo, respondo às dúvidas mais frequentes sobre o seu acompanhamento. Se preferir, posso te encaminhar para um atendente.'});
+  renderChat();
+}
+function renderChat(){
+  const body=document.getElementById('chat-body');
+  let h=chatMsgs.map(m=>`<div class="msg ${m.who}">${m.t}</div>`).join('');
+  const f=faqFor();
+  h+=`<div class="chat-sugg">${f.map((x,i)=>`<button class="sugg" onclick="askFaq(${i})">${x.q}</button>`).join('')}<button class="sugg human" onclick="talkHuman()">Falar com um atendente</button></div>`;
+  body.innerHTML=h; body.scrollTop=body.scrollHeight;
+}
+
+let prevId=null;
+render();
+</script>
+</body>
+</html>
