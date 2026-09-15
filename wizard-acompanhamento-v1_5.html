@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wizard de Acompanhamento de Processo (v1) — Antecipação · JusCash</title>
+<title>Wizard de Acompanhamento de Processo (v2) — Antecipação · JusCash</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   Protótipo clicável — Wizard de Acompanhamento (v1, antecipação)
+   Protótipo clicável — Wizard de Acompanhamento (v2, antecipação)
    Origem (lista + envio) → acompanhamento com ações funcionando.
    Estilo HeroUI · Fonte Figtree · Cores JusCash · Dados simulados.
    ============================================================ */
@@ -127,6 +127,8 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 .badge.error{background:var(--red-50);color:var(--red-900)}
 .badge.neutral{background:var(--n-100);color:var(--n-600)}
 .cond-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--yellow-900);background:var(--yellow-50);border:1px dashed var(--yellow-500);padding:4px 10px;border-radius:var(--r-full)}
+.sugg-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#7A4E00;background:#FFF6E0;border:1px dashed #C99A2E;padding:4px 10px;border-radius:var(--r-full)}
+.sugg-note{font-size:12px;color:#7A4E00;background:#FFF6E0;border:1px dashed #C99A2E;border-radius:var(--r-md);padding:8px 12px;margin-top:10px}
 .sc-title{font-size:22px;font-weight:800;margin:10px 0 4px}
 .sc-prazo{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-soft);margin-bottom:14px}
 .sc-prazo .clock{width:15px;height:15px}
@@ -166,6 +168,7 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 .field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px}
 .field .req{color:var(--red-500)}
 .field input,.field textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;font-size:14px;font-family:inherit;color:var(--text-dark);background:#fff}
+.field input[type=checkbox]{width:16px;height:16px;flex:none;padding:0;border:1.5px solid var(--border);border-radius:4px;accent-color:var(--primary-600)}
 .field input:focus,.field textarea:focus{outline:none;border-color:var(--primary-600);box-shadow:0 0 0 3px var(--primary-50)}
 .field.err input{border-color:var(--red-500);box-shadow:0 0 0 3px var(--red-50)}
 .field .msg{font-size:12px;color:var(--red-900);margin-top:6px;display:none}
@@ -301,7 +304,7 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 <body>
 
 <div class="review-bar">
-  <div class="rb-title">Protótipo · Wizard v1<span> · dados simulados</span></div>
+  <div class="rb-title">Protótipo · Wizard v2<span> · dados simulados</span></div>
   <div class="rb-strip" id="rb-strip"></div>
   <div class="rb-nav">
     <button onclick="prevNav()" title="Anterior">‹</button>
@@ -362,6 +365,28 @@ const STEPS=["Recebido","Análise","Proposta","Contrato","Assinatura","Depósito
 /* ================= Estado global ================= */
 let uploads={};      // arquivos anexados por chave
 let envio={ cred:null, segredo:false, cashback:false };
+let complementar={tipos:[]};
+let duvidaResposta=null;
+function responderDuvida(){ duvidaResposta='Sua proposta segue válida, sem alteração no valor ou nas condições. Você pode aceitar ou recusar quando quiser.'; goto('proposta'); }
+let elegivel={desagio:false, ir:false};
+function setElegivel(flags){ elegivel=Object.assign({desagio:false, ir:false}, flags); }
+const COMPLEMENTAR_LABEL={desagio:'deságio flexível', ir:'devolução de IR', modelo50:'segunda parcela do modelo 50%'};
+const COMPLEMENTAR_MOTIVO_NEGADO={
+  desagio:'deságio flexível: após análise, vimos que o prazo do deságio flexível já venceu sem que o crédito tivesse sido recebido dentro dele, então não há valor adicional a pagar',
+  ir:'devolução de IR: após análise, vimos que o valor calculado inicialmente (R$ 5.000,00) foi igual ao valor efetivamente descontado (R$ 5.000,00), então não há diferença a devolver',
+  modelo50:'segunda parcela do modelo 50%: após análise, vimos que a homologação da cessão ainda não saiu, então a segunda parcela ainda não pode ser liberada',
+};
+function motivoComplementarNegado(tipos){
+  const motivos=tipos.map(t=>COMPLEMENTAR_MOTIVO_NEGADO[t]);
+  if(motivos.length===1) return motivos[0].charAt(0).toUpperCase()+motivos[0].slice(1)+'.';
+  return motivos.map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join('. ')+'.';
+}
+function setComplementar(tipos){ complementar={tipos}; }
+function labelComplementarLista(tipos){
+  const labs=tipos.map(t=>COMPLEMENTAR_LABEL[t]);
+  if(labs.length===1) return labs[0];
+  return labs.slice(0,-1).join(', ')+' e '+labs[labs.length-1];
+}
 let sessao={ slot:0, confirmado:false };
 
 /* ================= Ações genéricas ================= */
@@ -392,22 +417,31 @@ function submitUpload(key,target,tTitle,tMsg){
 }
 function act(target,tTitle,tMsg){ if(tTitle)toast(tTitle,tMsg); goto(target); }
 
-function confirmRecusa(){
+function confirmRecusa(){const k='recusa';
   openModal(`<div class="m-body">
     <h3>Recusar a proposta?</h3>
     <p>Ao recusar, a negociação é encerrada. Você ainda poderá reenviar o processo depois, se quiser.</p>
+    <div class="sugg-note"><b>◇ Sugestão, a validar:</b> campo de motivo e anexo abaixo, ainda sem validação do Comercial.</div>
+    <div class="field" style="margin-top:12px">
+      <label>Motivo da recusa (opcional)</label>
+      <textarea rows="3" placeholder="Conte o motivo, se quiser"></textarea>
+    </div>
+    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste um anexo ou <b>clique para selecionar</b></div><div class="hint">Opcional · PDF, JPG ou PNG, até 20 MB</div></label>
+    <input id="f_${k}" type="file" hidden onchange="onFile('${k}');refreshRecusa()">
+    <div id="recusa-chip">${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}');refreshRecusa()">✕</span></div>`:''}</div>
     <div class="m-foot">
       <button class="btn btn-outline btn-sm" onclick="closeModal()">Voltar</button>
       <button class="btn btn-danger-o btn-sm" onclick="closeModal();act('encerrada','Proposta recusada','A negociação foi encerrada.')">Recusar proposta</button>
     </div></div>`);
 }
+function refreshRecusa(){ confirmRecusa(); }
 function openSign(){
   openModal(`<div class="m-body">
     <h3>Plataforma de assinatura</h3>
     <p>Você está sendo direcionado para a plataforma de assinatura externa, com segurança. Ao concluir a assinatura, você volta para o acompanhamento.</p>
     <div class="m-foot">
       <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="closeModal();act('protocolo','Contrato assinado','Agora protocole as vias e envie o comprovante.')">Simular assinatura concluída</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal();act('protocolo','Contrato assinado','Agora vamos protocolar as vias no tribunal para você.')">Simular assinatura concluída</button>
     </div></div>`);
 }
 function confirmarSessao(){ sessao.confirmado=true; toast('Horário confirmado','O link da chamada foi gerado e enviado a você.'); render(); }
@@ -416,24 +450,66 @@ function confirmarSessao(){ sessao.confirmado=true; toast('Horário confirmado',
 function setCred(c){ envio.cred=c; render(); }
 function toggleSegredo(){ envio.segredo=!envio.segredo; render(); }
 function toggleCashback(){ envio.cashback=!envio.cashback; render(); }
+function toggleUnico(){ envio.unico=envio.unico===false?true:false; render(); }
 function submitEnvio(){
   const f=document.getElementById('num_proc');
   const digits=(f.value||'').replace(/\D/g,'');
   const wrap=document.getElementById('field_num');
-  if(digits.length<20){ wrap.classList.add('err'); f.focus(); return; }
+  const msg=document.getElementById('msg_num');
+  if(digits.length<20){
+    msg.textContent='Informe um número de processo válido (padrão CNJ, 20 dígitos).';
+    wrap.classList.add('err'); f.focus(); return;
+  }
+  const anoProc=parseInt(digits.substring(9,13),10);
+  const anoAtual=new Date().getFullYear();
+  if(anoProc>=anoAtual){
+    msg.textContent=`Não aceitamos processos do ano vigente (${anoAtual}) ou de anos futuros. Verifique o número informado.`;
+    wrap.classList.add('err'); f.focus(); return;
+  }
   if(!envio.cred){ toast('Selecione o crédito','Escolha qual crédito deseja antecipar.'); return; }
   wrap.classList.remove('err');
   goto('enviado');
 }
 
 /* ================= Telas de origem ================= */
+/* linhas de exemplo, uma para cada status existente hoje (validados + sugestões incluídas nesta rodada) */
+const LISTA_ROWS=[
+  {num:'1002411-16.2023.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Processo recebido',badge:'info',go:'recebido'},
+  {num:'0005582-90.2022.5.02.0004',trib:'TRT-2',cred:'Crédito do autor',st:'Em análise',badge:'info',go:'analise'},
+  {num:'0021144-70.2022.8.16.0001',trib:'TJPR',cred:'Honorários',st:'Aguardando acesso ao processo',badge:'action',go:'acesso'},
+  {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Proposta disponível',badge:'success',go:'proposta'},
+  {num:'0018832-11.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Em avaliação (dúvida sobre a proposta)',badge:'info',go:'duvida-proposta',sugg:true},
+  {num:'0023981-77.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Proposta disponível (dúvida respondida)',badge:'success',go:'proposta',fnPre:"duvidaResposta='Sua proposta segue válida, sem alteração no valor ou nas condições. Você pode aceitar ou recusar quando quiser.'",sugg:true},
+  {num:'0009921-33.2020.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Aguardando seus documentos',badge:'action',go:'documentos'},
+  {num:'0044210-05.2021.5.02.0011',trib:'TRT-2',cred:'Crédito do autor',st:'Preparando contrato',badge:'info',go:'contrato'},
+  {num:'0007733-88.2022.8.26.0114',trib:'TJSP',cred:'Honorários',st:'Aguardando sua assinatura',badge:'action',go:'assinatura'},
+  {num:'0012099-40.2021.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Protocolando',badge:'info',go:'protocolo'},
+  {num:'0033456-27.2021.8.26.0224',trib:'TJSP',cred:'Honorários',st:'Aguardando a sessão pública',badge:'action',go:'sessao'},
+  {num:'0004471-63.2022.5.15.0002',trib:'TRT-15',cred:'Crédito do autor',st:'Depósito em andamento',badge:'info',go:'deposito'},
+  {num:'0067789-31.2021.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Aguardando homologação (2ª parcela, modelo 50%)',badge:'action',go:'homologacao-50',sugg:true},
+  {num:'0088521-19.2020.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Aguardando homologação da cessão (sem depósito antes)',badge:'action',go:'aguarda-homologacao',sugg:true},
+  {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Concluído',badge:'success',go:'concluido',eleg:{desagio:false,ir:false}},
+  {num:'0099231-40.2022.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Concluído (elegível a deságio flexível e IR)',badge:'success',go:'concluido',eleg:{desagio:true,ir:true},sugg:true},
+  {num:'0055102-84.2022.8.16.0004',trib:'TJPR',cred:'Honorários',st:'Processo não aprovado',badge:'error',go:'nao-aprovado'},
+  {num:'0038814-22.2022.8.16.0004',trib:'TJPR',cred:'Honorários',st:'Em avaliação (contestação da negativa)',badge:'info',go:'contestacao-analise',sugg:true},
+  {num:'0009921-33.2020.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Negociação encerrada',badge:'neutral',go:'encerrada'},
+  {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Em avaliação (deságio flexível)',badge:'info',go:'complementar-analise',tipos:['desagio'],sugg:true},
+  {num:'0067789-31.2021.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Em avaliação (devolução de IR)',badge:'info',go:'complementar-analise',tipos:['ir'],sugg:true},
+  {num:'0021144-70.2022.8.16.0001',trib:'TJPR',cred:'Honorários',st:'Em avaliação (modelo 50%, homologação)',badge:'info',go:'complementar-analise',tipos:['modelo50'],sugg:true},
+  {num:'0007733-88.2022.8.26.0114',trib:'TJSP',cred:'Honorários',st:'Em avaliação (deságio flexível + devolução de IR)',badge:'info',go:'complementar-analise',tipos:['desagio','ir'],sugg:true},
+  {num:'0005582-90.2022.5.02.0004',trib:'TRT-2',cred:'Crédito do autor',st:'Aguardando assinatura do aditivo (deságio flexível)',badge:'action',go:'complementar-aditivo',tipos:['desagio'],sugg:true},
+  {num:'0012099-40.2021.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Solicitação não aprovada (devolução de IR)',badge:'error',go:'complementar-negado',tipos:['ir'],sugg:true},
+];
+/* exploração: como uma exceção aparece pro cliente, genérico vs específico (sugestão, ajuda a decidir em reunião) */
+const EXCECAO_EXEMPLO={num:'0067789-31.2021.8.26.0100',trib:'TJSP',cred:'Honorários',go:'homologacao-50'};
+
+let listaPage=0;
+const LISTA_PAGE_SIZE=6;
+function listaSetPage(p){ listaPage=p; render(); }
 function screenLista(){
-  const rows=[
-    {num:'1002411-16.2023.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Em andamento · Proposta disponível',badge:'success',go:'proposta'},
-    {num:'0005582-90.2022.5.02.0004',trib:'TRT-2',cred:'Crédito do autor',st:'Em andamento · Aguardando sua assinatura',badge:'action',go:'assinatura'},
-    {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Concluída · Pagamento realizado',badge:'success',go:'concluido'},
-    {num:'0009921-33.2020.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Perdida · Negociação encerrada',badge:'neutral',go:'encerrada'},
-  ];
+  const totalPages=Math.ceil(LISTA_ROWS.length/LISTA_PAGE_SIZE);
+  const start=listaPage*LISTA_PAGE_SIZE;
+  const rows=LISTA_ROWS.slice(start,start+LISTA_PAGE_SIZE);
   return `
   <div class="page-h page-h-row">
     <div><h1>Antecipações</h1><p>Acompanhe aqui suas antecipações de honorários com a JusCash, do envio do processo até o pagamento.</p></div>
@@ -441,14 +517,41 @@ function screenLista(){
   </div>
   <div class="pcards">
     ${rows.map(r=>`
-      <div class="pcard" onclick="goto('${r.go}')">
+      <div class="pcard" onclick="${r.tipos?`setComplementar([${r.tipos.map(t=>`'${t}'`).join(',')}]);`:''}${r.eleg?`setElegivel({${Object.keys(r.eleg).map(k=>`${k}:${r.eleg[k]}`).join(',')}});pagSel={desagio:false,ir:false};homIrSel=false;`:''}${r.fnPre?`${r.fnPre};`:''}goto('${r.go}')">
         <div class="pc-main">
           <div class="pc-num">Processo nº ${r.num}</div>
           <div class="pc-meta">${r.trib} · ${r.cred}</div>
-          <div class="pc-status"><span class="badge ${r.badge}" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>${r.st}</span></div>
+          <div class="pc-status"><span class="badge ${r.badge}" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>${r.st}</span>${r.sugg?` <span class="sugg-tag">◇ sugestão</span>`:''}</div>
         </div>
         <div class="chev">›</div>
       </div>`).join('')}
+  </div>
+  ${totalPages>1?`
+  <div class="btn-row" style="justify-content:center;margin-top:14px">
+    ${Array.from({length:totalPages}).map((_,i)=>`<button class="btn ${i===listaPage?'btn-primary':'btn-outline'} btn-sm" onclick="listaSetPage(${i})">${i+1}</button>`).join('')}
+  </div>`:''}
+  <div class="status-card" style="max-width:900px;margin-top:20px">
+    <div class="sc-body">
+      <div class="sc-head"><span class="sugg-tag">◇ Exploração, a decidir em reunião</span></div>
+      <div class="sc-title" style="font-size:15px">Como uma exceção aparece pro cliente</div>
+      <p class="sub" style="margin:2px 0 14px">Duas opções lado a lado para o mesmo caso (processo no modelo 50%, aguardando a homologação), sem escolha feita ainda. A mesma lógica valeria para deságio flexível e devolução de IR.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <div class="pcard" style="flex:1;min-width:260px;cursor:default">
+          <div class="pc-main">
+            <div class="pc-num">Opção A · genérico</div>
+            <div class="pc-meta">Processo nº ${EXCECAO_EXEMPLO.num} · ${EXCECAO_EXEMPLO.trib}</div>
+            <div class="pc-status"><span class="badge action" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>Pendência</span></div>
+          </div>
+        </div>
+        <div class="pcard" style="flex:1;min-width:260px;cursor:default">
+          <div class="pc-main">
+            <div class="pc-num">Opção B · específico</div>
+            <div class="pc-meta">Processo nº ${EXCECAO_EXEMPLO.num} · ${EXCECAO_EXEMPLO.trib}</div>
+            <div class="pc-status"><span class="badge action" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>Aguardando homologação (2ª parcela, modelo 50%)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="help-card" style="max-width:820px">
     <div class="hc-ic">💬</div>
@@ -466,7 +569,7 @@ function screenEnvio(){
     <div class="field" id="field_num">
       <label>Número do processo <span class="req">*</span></label>
       <input id="num_proc" type="text" placeholder="0000000-00.0000.0.00.0000" value="1002411-16.2023.8.26.0100">
-      <div class="msg">Informe um número de processo válido (padrão CNJ, 20 dígitos).</div>
+      <div class="msg" id="msg_num">Informe um número de processo válido (padrão CNJ, 20 dígitos).</div>
     </div>
     <div class="field">
       <label>Qual crédito você deseja antecipar? <span class="req">*</span></label>
@@ -496,6 +599,10 @@ function screenEnvio(){
       <label>Solicitar cashback nesta antecipação?</label>
       <div class="toggle ${envio.cashback?'on':''}" onclick="toggleCashback()"><span class="tk"></span><span>${envio.cashback?'Sim':'Não'}</span></div>
     </div>
+    <div class="field">
+      <label style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><input type="checkbox" ${envio.unico===false?'checked':''} onchange="toggleUnico()"> <span>Não sou o único advogado habilitado neste processo</span> <span class="sugg-tag">◇ Campo experimental</span></label>
+      ${envio.unico===false?`<div class="sugg-note" style="margin-top:8px">Como há mais de um advogado habilitado, pode ser necessário um documento adicional (ex.: renúncia dos demais). Isso será confirmado com você durante a análise.</div>`:''}
+    </div>
     <div class="btn-row" style="margin-top:8px">
       <button class="btn btn-primary" onclick="submitEnvio()">${ic.send}Enviar para análise</button>
       <button class="btn btn-ghost" onclick="goto('lista')">Cancelar</button>
@@ -522,10 +629,12 @@ function screenEnviado(){
 }
 
 /* ================= Ações do wizard (interativas) ================= */
+
 function actProposta(){return `
   <div class="action">
     <h3>Sua proposta</h3>
-    <p class="sub">Confira o valor e as condições. Se tiver dúvidas antes de decidir, fale com o assistente.</p>
+    <p class="sub">Confira o valor e as condições. Se tiver dúvidas antes de decidir, escreva pra gente.</p>
+    ${duvidaResposta?`<div class="sugg-note">◇ Sugestão, a validar · <b>Resposta à sua dúvida:</b> ${duvidaResposta}</div>`:''}
     <div class="proposal">
       <div class="p-top"><small>Valor a receber</small><div class="val">R$ <span class="ph">••.•••,••</span></div></div>
       <div class="p-rows">
@@ -534,13 +643,26 @@ function actProposta(){return `
         <div class="p-row"><span>Prazo de pagamento</span><b>Até 24h após a formalização</b></div>
         <div class="p-row"><span>Validade da proposta</span><b><span class="ph">•</span> dias</b></div>
       </div>
-      <div class="p-note">${ic.info}<span>O detalhamento de cálculo, deságio e valores não é exibido nesta tela (fora do escopo da v1).</span></div>
+      <div class="p-note">${ic.info}<span>O detalhamento de cálculo, deságio e valores não é exibido nesta tela (fora do escopo desta tela).</span></div>
     </div>
     <div class="btn-row" style="margin-top:18px">
       <button class="btn btn-primary" onclick="act('documentos','Proposta aceita','Vamos seguir com a formalização.')">Aceitar proposta</button>
       <button class="btn btn-danger-o" onclick="confirmRecusa()">Recusar</button>
+      <button class="btn btn-outline" onclick="confirmDuvida()">Tenho uma dúvida sobre a proposta <span class="sugg-tag" style="margin-left:6px">◇ sugestão</span></button>
     </div>
   </div>`;}
+
+function confirmDuvida(){
+  openModal(`<div class="m-body">
+    <h3>Dúvida sobre a proposta</h3>
+    <p>Escreva sua dúvida. Se quiser sugerir outro valor ou condição (contraproposta), pode escrever aqui também.</p>
+    <div class="sugg-note"><b>◇ Sugestão, a validar:</b> este fluxo ainda depende de alinhamento maior sobre o funcionamento da contestação.</div>
+    <div class="field" style="margin-top:12px"><textarea rows="3" placeholder="Escreva sua dúvida ou contraproposta"></textarea></div>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Voltar</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal();act('duvida-proposta','Dúvida enviada','Vamos avaliar e te responder por aqui.')">Enviar</button>
+    </div></div>`);
+}
 
 function actCopia(){const k='acesso';return `
   <div class="action">
@@ -559,9 +681,10 @@ function actDocs(){const k='docs';return `
     <h3>Enviar documentos</h3>
     <p class="sub">Anexe os documentos solicitados para seguir com a formalização. A lista é definida conforme o seu caso.</p>
     <ul class="checklist">
-      <li class="doc-item"><span><b>Documento solicitado</b> <span class="ph">(ex.: documento de identidade)</span></span><span class="st">${uploads[k]?'Anexado':'Pendente'}</span></li>
-      <li class="doc-item"><span><b>Documento solicitado</b> <span class="ph">(ex.: comprovante de dados)</span></span><span class="st">${uploads[k]?'Anexado':'Pendente'}</span></li>
+      <li class="doc-item"><span><b>Carteira da OAB ou documento de identidade</b></span><span class="st">${uploads[k]?'Anexado':'Pendente'}</span></li>
+      <li class="doc-item"><span><b>Comprovante de endereço</b></span><span class="st">${uploads[k]?'Anexado':'Pendente'}</span></li>
     </ul>
+    <p class="sub" style="margin-top:-4px">Em alguns casos podem ser pedidos documentos extras, como contrato social (PJ), contrato de parceria, termo de renúncia de outros advogados ou documentos do autor do processo.</p>
     <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste os arquivos ou <b>clique para selecionar</b></div><div class="hint">PDF, JPG ou PNG, até 20 MB por arquivo</div></label>
     <input id="f_${k}" type="file" hidden multiple onchange="onFile('${k}')">
     ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}')">✕</span></div>`:''}
@@ -576,32 +699,6 @@ function actAssinatura(){return `
     <p class="sub">A assinatura é feita em uma plataforma de assinatura externa, com segurança. Ao terminar, você volta para acompanhar o processo aqui.</p>
     <div class="alert info">${ic.info}<div>Você será direcionado para um site externo (plataforma de assinatura). O acompanhamento continua nesta página.</div></div>
     <div class="btn-row"><button class="btn btn-primary" onclick="openSign()">${ic.ext}Abrir plataforma de assinatura</button></div>
-  </div>`;}
-
-function actProtocolo(){const k='comprov';return `
-  <div class="action">
-    <h3>Protocolar e enviar o comprovante</h3>
-    <p class="sub">Depois de assinar, protocole as vias no seu processo, no sistema do tribunal, e envie o comprovante do protocolo.</p>
-    <ul class="checklist">
-      <li><span class="num">1</span><span>Protocole as vias assinadas do contrato no seu processo, pelo sistema do tribunal.</span></li>
-      <li><span class="num">2</span><span>Salve o comprovante do protocolo (PDF).</span></li>
-      <li><span class="num">3</span><span>Envie o comprovante abaixo para seguirmos para a conferência.</span></li>
-    </ul>
-    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste o comprovante do protocolo ou <b>clique para selecionar</b></div><div class="hint">PDF, até 20 MB</div></label>
-    <input id="f_${k}" type="file" hidden onchange="onFile('${k}')">
-    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}')">✕</span></div>`:''}
-    <div class="btn-row" style="margin-top:18px"><button class="btn btn-primary" ${uploads[k]?'':'disabled'} onclick="act('conferencia','Comprovante enviado','Vamos conferir e liberar o pagamento.')">${ic.send}Enviar comprovante</button></div>
-  </div>`;}
-
-function actAjuste(){const k='comprov2';return `
-  <div class="action">
-    <h3>Corrigir o protocolo</h3>
-    <p class="sub">Veja a pendência apontada na conferência, corrija no seu processo e reenvie o comprovante do protocolo.</p>
-    <div class="alert error">${ic.alert}<div><b>Pendência encontrada:</b> juntou documentos sem assinatura.<br><span style="font-size:13px">Reenvie as vias devidamente assinadas no seu processo e, em seguida, envie o novo comprovante do protocolo.</span></div></div>
-    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste o novo comprovante do protocolo ou <b>clique para selecionar</b></div><div class="hint">PDF, até 20 MB</div></label>
-    <input id="f_${k}" type="file" hidden onchange="onFile('${k}')">
-    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}')">✕</span></div>`:''}
-    <div class="btn-row" style="margin-top:18px"><button class="btn btn-primary" ${uploads[k]?'':'disabled'} onclick="act('conferencia','Novo comprovante enviado','A conferência recomeça com o comprovante corrigido.')">${ic.send}Reenviar comprovante</button></div>
   </div>`;}
 
 function actSessao(){
@@ -619,19 +716,80 @@ function actSessao(){
     <div class="slots">
       ${slots.map((s,i)=>`<label class="slot ${sessao.slot===i?'sel':''}" onclick="sessao.slot=${i};render()"><span class="radio"></span><div><b>${s[0]}</b> <span>· 30 min · por videochamada</span></div></label>`).join('')}
     </div>
-    <div class="alert info">${ic.info}<div>Depois de confirmar, o link da chamada aparece aqui e é enviado a você. Esta é a única etapa da v1 com contato ativo.</div></div>
+    <div class="alert info">${ic.info}<div>Depois de confirmar, o link da chamada aparece aqui e é enviado a você. Esta é a única etapa do wizard com contato ativo.</div></div>
     <div class="btn-row"><button class="btn btn-primary" onclick="confirmarSessao()">Confirmar horário</button></div>
   </div>`;}
 
-function actConcluido(){return `
+function pedirComplementarHom(){ setComplementar(['modelo50']); goto('complementar-analise'); }
+function actHomologacao50(){return `
+  <div class="action">
+    <div class="sugg-note">◇ Sugestão, a validar: nome do status e se ele realmente vira um status separado ainda dependem de validação com Jurídico/Comercial. Devolução de IR não entra aqui, é sempre solicitada separadamente, depois do Concluído.</div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn btn-primary" onclick="pedirComplementarHom()">Solicitar pagamento complementar</button></div>
+  </div>`;}
+
+function actAguardaHomologacao(){return `
+  <div class="action">
+    <div class="sugg-note">◇ Sugestão, a validar: mesma lógica do modelo 50%, mas aqui não há nenhum pagamento antes da homologação. Devolução de IR não entra aqui, é sempre solicitada separadamente, depois do Concluído.</div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn btn-primary" onclick="act('deposito','Homologação confirmada','Vamos processar o pagamento.')">Avisar que a homologação saiu</button></div>
+  </div>`;}
+
+let pagSel={desagio:false, ir:false};
+function togglePagSel(t){ pagSel[t]=!pagSel[t]; render(); }
+function pedirComplementarPag(){
+  const tipos=Object.keys(pagSel).filter(k=>pagSel[k]);
+  if(!tipos.length) return;
+  setComplementar(tipos); goto('complementar-analise');
+}
+function actComplementarAditivo(){return `
+  <div class="action">
+    <div class="sugg-note">◇ Sugestão, a validar: mecanismo de aditivo ainda sem validação do Jurídico/Comercial.</div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn btn-primary" onclick="act('deposito','Aditivo assinado','Agora vamos processar o pagamento.')">Simular assinatura do aditivo</button></div>
+  </div>`;}
+
+function actComplementarNegado(){return `
+  <div class="action">
+    <div class="sugg-note">◇ Sugestão, a validar: critérios de aprovação/recusa ainda não definidos.</div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn btn-outline" onclick="goto('concluido')">Voltar</button></div>
+  </div>`;}
+
+function actConcluido(){const algumSel=pagSel.desagio||pagSel.ir; const algumEleg=elegivel.desagio||elegivel.ir; return `
   <div class="action">
     <div class="result"><div class="r-ic">${ic.check}</div><div><div class="val">R$ <span class="ph">••.•••,••</span></div><small>Depositado via PIX em <span class="ph">••/••/••••</span></small></div></div>
     <div class="btn-row"><button class="btn btn-outline" onclick="toast('Comprovante','Abre o comprovante do pagamento.')">Ver comprovante</button><button class="btn btn-primary" onclick="goto('envio')">Enviar outro processo</button></div>
+    ${algumEleg?`
+    <div class="sugg-note" style="margin-top:16px">◇ Sugestão, a validar: opções abaixo só aparecem quando o processo realmente tem valores a receber (deságio flexível e/ou devolução de IR), conforme o contrato. Não é automático, o cliente solicita.</div>
+    ${elegivel.desagio?`<div class="field" style="margin-top:10px">
+      <label style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><input type="checkbox" ${pagSel.desagio?'checked':''} onchange="togglePagSel('desagio')" style="flex:none"> <span>Deságio flexível, o crédito foi recebido dentro do prazo combinado (antes da data limite)</span></label>
+    </div>`:''}
+    ${elegivel.ir?`<div class="field" style="margin-top:10px">
+      <label style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><input type="checkbox" ${pagSel.ir?'checked':''} onchange="togglePagSel('ir')" style="flex:none"> <span>Devolução de IR, diferença entre o IR estimado e o real</span></label>
+    </div>`:''}
+    ${algumSel?`<div class="btn-row" style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="pedirComplementarPag()">Solicitar pagamento complementar</button></div>`:''}`:''}
   </div>`;}
 
+let contestacaoNegativa=null;
+function confirmContestacaoNegativa(){const k='contest';
+  openModal(`<div class="m-body">
+    <h3>Contestar a negativa</h3>
+    <p>Explique por que acha que o processo deveria ser reavaliado. Isso cai direto com o time de análise.</p>
+    <div class="sugg-note"><b>◇ Sugestão, a validar:</b> fluxo de contestação ainda sem validação do Jurídico. Não é chat, é um envio único que volta como resposta aqui na tela.</div>
+    <div class="field" style="margin-top:12px"><textarea rows="3" placeholder="Explique o motivo da contestação"></textarea></div>
+    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste um anexo ou <b>clique para selecionar</b></div><div class="hint">Opcional · PDF, JPG ou PNG, até 20 MB</div></label>
+    <input id="f_${k}" type="file" hidden onchange="onFile('${k}');confirmContestacaoNegativa()">
+    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}');confirmContestacaoNegativa()">✕</span></div>`:''}
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Voltar</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal();contestacaoNegativa='enviada';goto('contestacao-analise')">Enviar contestação</button>
+    </div></div>`);
+}
+function simularRespostaContestacao(){ contestacaoNegativa='respondida'; goto('nao-aprovado'); }
 function actNaoAprovado(){return `
   <div class="action">
-    <div class="btn-row"><button class="btn btn-primary" onclick="goto('envio')">Enviar outro processo</button><button class="btn btn-outline" onclick="openChat()">Tirar dúvidas</button></div>
+    ${!contestacaoNegativa?`<div class="btn-row"><button class="btn btn-primary" onclick="goto('envio')">Enviar outro processo</button><button class="btn btn-outline" onclick="confirmContestacaoNegativa()">Contestar <span class="sugg-tag" style="margin-left:6px">◇ sugestão</span></button></div>`:''}
+    ${contestacaoNegativa==='respondida'?`
+    <div class="sugg-note" style="margin-top:14px">◇ Sugestão, a validar · <b>Resposta à sua contestação:</b> Reavaliamos o processo com as informações enviadas, mas mantemos o parecer anterior desta vez.</div>
+    <div class="btn-row" style="margin-top:12px"><button class="btn btn-primary" onclick="goto('envio')">Enviar outro processo</button></div>
+    `:''}
   </div>`;}
 
 function actEncerrada(){return `
@@ -644,7 +802,7 @@ function actEncerrada(){return `
 /* painel de simulação para etapas de sistema (sem ação do cliente) */
 function sim(title, opts){
   return `<div class="sim"><div class="sim-h">${ic.play} ${title} <span class="tag">SIMULAÇÃO</span></div>
-    <div class="btn-row">${opts.map(o=>`<button class="btn ${o.v||'btn-outline'} btn-sm" onclick="goto('${o.t}')">${o.l}</button>`).join('')}</div></div>`;
+    <div class="btn-row">${opts.map(o=>`<button class="btn ${o.v||'btn-outline'} btn-sm" onclick="${o.fn?o.fn:(o.msg?`act('${o.t}','${o.msgTitle||'Resposta'}','${o.msg}')`:`goto('${o.t}')`)}">${o.l}</button>`).join('')}</div></div>`;
 }
 
 /* ================= Estados do wizard ================= */
@@ -673,6 +831,16 @@ const STATES=[
     desc:'Sua proposta de antecipação está pronta. Confira o valor e as condições e escolha se deseja aceitar ou recusar.',
     action:actProposta },
 
+  {group:'cond', id:'duvida-proposta', step:2, badge:'info', badgeTxt:'Em avaliação', accent:'var(--blue-500)', cond:true, sugg:true,
+    title:'Em avaliação', prazo:'Prazo estimado de resposta: até 3 dias úteis.',
+    desc:'Sua dúvida (ou contraproposta) sobre a proposta está em avaliação. Assim que respondermos, o status volta para "Proposta disponível" com a resposta visível ali.',
+    sim:()=>sim('Simular resposta da dúvida',[{l:'Responder',t:'proposta',v:'btn-primary',fn:"responderDuvida()"}]) },
+
+  {group:'cond', id:'contestacao-analise', step:2, badge:'info', badgeTxt:'Em avaliação', accent:'var(--blue-500)', cond:true, sugg:true,
+    title:'Em avaliação', prazo:'Prazo estimado de resposta: até 3 dias úteis.',
+    desc:'Sua contestação sobre o motivo da negativa está em avaliação. Assim que respondermos, o status volta para "Processo não aprovado" com a resposta visível ali.',
+    sim:()=>sim('Simular resposta da contestação',[{l:'Responder',t:'',v:'btn-primary',fn:'simularRespostaContestacao()'}]) },
+
   {group:'cond', id:'documentos', step:2, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true,
     title:'Aguardando seus documentos', prazo:'A formalização continua assim que recebermos os documentos.',
     desc:'Precisamos dos seus documentos para seguir com a formalização do contrato. Envie os arquivos solicitados abaixo. Se já tivermos os seus documentos, esta etapa é pulada.',
@@ -688,20 +856,10 @@ const STATES=[
     desc:'Seu contrato está pronto para assinar. A assinatura é feita em uma plataforma de assinatura externa, com segurança.',
     action:actAssinatura },
 
-  {group:'happy', id:'protocolo', step:4, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)',
-    title:'Aguardando protocolo', prazo:'O pagamento é liberado após a conferência do protocolo.',
-    desc:'Protocole as vias assinadas no seu processo, no sistema do tribunal, e envie o comprovante do protocolo. Precisamos dele para conferir e liberar o pagamento.',
-    action:actProtocolo },
-
-  {group:'happy', id:'conferencia', step:4, badge:'info', badgeTxt:'Em andamento', accent:'var(--blue-500)',
-    title:'Em conferência', prazo:'Prazo estimado desta etapa: até 2 dias úteis.',
-    desc:'Estamos conferindo o seu contrato e o comprovante do protocolo antes de liberar o pagamento. Você não precisa fazer nada agora.',
-    sim:()=>sim('Simular resultado da conferência',[{l:'Liberar pagamento',t:'deposito',v:'btn-primary'},{l:'Pendência no protocolo',t:'ajuste'},{l:'Precisa de sessão pública',t:'sessao'}]) },
-
-  {group:'cond', id:'ajuste', step:4, badge:'action', badgeTxt:'Ação necessária', accent:'var(--red-500)', cond:true,
-    title:'Aguardando ajuste no protocolo', prazo:'A conferência recomeça assim que recebermos o novo comprovante.',
-    desc:'Encontramos uma pendência no protocolo das vias. Veja o que precisa ser corrigido, ajuste no seu processo e reenvie o comprovante do protocolo.',
-    action:actAjuste },
+  {group:'happy', id:'protocolo', step:4, badge:'info', badgeTxt:'Em andamento', accent:'var(--blue-500)',
+    title:'Protocolando', prazo:'Prazo estimado desta etapa: até 2 dias úteis.',
+    desc:'Estamos protocolando as vias assinadas do seu processo, no sistema do tribunal, e conferindo tudo antes de liberar o pagamento. Você não precisa fazer nada agora.',
+    sim:()=>sim('Avançar o protótipo',[{l:'Protocolo concluído, liberar pagamento',t:'deposito',v:'btn-primary'},{l:'Precisa de sessão pública',t:'sessao'},{l:'Modelo aguarda homologação, sem depósito antes',t:'aguarda-homologacao'}]) },
 
   {group:'cond', id:'sessao', step:4, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true,
     title:'Aguardando a sessão pública', prazo:'Etapa que depende de agendamento com o tabelionato.',
@@ -711,7 +869,32 @@ const STATES=[
   {group:'happy', id:'deposito', step:5, badge:'info', badgeTxt:'Em andamento', accent:'var(--blue-500)',
     title:'Depósito em andamento', prazo:'O pagamento costuma ser realizado em até 24h após a liberação.',
     desc:'Seu pagamento está sendo processado. Assim que o depósito for concluído, você verá a confirmação aqui.',
-    sim:()=>sim('Avançar o protótipo',[{l:'Confirmar pagamento',t:'concluido',v:'btn-primary'}]) },
+    sim:()=>sim('Avançar o protótipo',[{l:'Confirmar pagamento',t:'concluido',v:'btn-primary'},{l:'Modelo 50%, aguardar homologação',t:'homologacao-50'}]) },
+
+  {group:'cond', id:'homologacao-50', step:5, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true, sugg:true,
+    title:'Aguardando homologação (2ª parcela, modelo 50%)', prazo:'A segunda parcela é liberada após a homologação.',
+    desc:'A primeira metade do valor já foi paga. A segunda metade é liberada depois que a homologação da cessão sair. Avise quando ela sair.',
+    action:actHomologacao50 },
+
+  {group:'cond', id:'aguarda-homologacao', step:4, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true, sugg:true,
+    title:'Aguardando homologação da cessão', prazo:'O pagamento é liberado após a homologação.',
+    desc:'Este processo é no modelo aguarda homologação: diferente do modelo 50%, não há nenhum valor pago antes. O pagamento só é liberado depois que a homologação da cessão sair. Avise quando ela sair.',
+    action:actAguardaHomologacao },
+
+  {group:'cond', id:'complementar-analise', step:6, badge:'info', badgeTxt:'Em avaliação', accent:'var(--blue-500)', cond:true, sugg:true,
+    title:'Em avaliação', prazo:'Prazo estimado de resposta: até 3 dias úteis.',
+    desc:()=>`Sua solicitação de ${labelComplementarLista(complementar.tipos)} está em avaliação. Você recebe uma resposta por aqui.`,
+    sim:()=>sim('Simular resposta da solicitação',[{l:'Aprovar, seguir para o aditivo',t:'complementar-aditivo',v:'btn-primary',msgTitle:'Solicitação aprovada',msg:'Confira os detalhes na próxima tela.'},{l:'Recusar solicitação',t:'complementar-negado',msgTitle:'Solicitação não aprovada',msg:'Confira o motivo na próxima tela.'}]) },
+
+  {group:'cond', id:'complementar-aditivo', step:6, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true, sugg:true,
+    title:'Aguardando assinatura do aditivo', prazo:'O pagamento é liberado após a assinatura do aditivo.',
+    desc:()=>`Sua solicitação de ${labelComplementarLista(complementar.tipos)} foi aprovada. Falta assinar o aditivo para seguirmos para o pagamento.`,
+    action:actComplementarAditivo },
+
+  {group:'cond', id:'complementar-negado', step:6, badge:'error', badgeTxt:'Não aprovada', accent:'var(--red-500)', cond:true, sugg:true,
+    title:'Solicitação não aprovada', prazo:'',
+    desc:()=>motivoComplementarNegado(complementar.tipos),
+    action:actComplementarNegado },
 
   {group:'happy', id:'concluido', step:6, badge:'success', badgeTxt:'Concluído', accent:'var(--green-500)',
     title:'Concluído', prazo:'Antecipação concluída.',
@@ -720,7 +903,7 @@ const STATES=[
 
   {group:'final', id:'nao-aprovado', step:2, badge:'error', badgeTxt:'Não aprovado', accent:'var(--red-500)', terminal:true, failAt:2,
     title:'Processo não aprovado', prazo:'Análise encerrada.',
-    desc:'Seu processo não foi aprovado para antecipação nesta análise. Se quiser entender melhor o motivo, fale com o nosso assistente.',
+    desc:'Ao avaliarmos o processo, verificamos que ele não atende os requisitos da política da empresa e dos nossos investidores, portanto, não podemos antecipar esse processo no momento.',
     action:actNaoAprovado },
 
   {group:'final', id:'encerrada', step:2, badge:'neutral', badgeTxt:'Encerrada', accent:'var(--n-500)', terminal:true, failAt:2,
@@ -731,8 +914,8 @@ const STATES=[
 const byId=id=>STATES.find(s=>s.id===id);
 
 /* navegação linear (prev/próximo) e fallback para estados fora da linha */
-const ORDER=['lista','envio','enviado','recebido','analise','proposta','documentos','contrato','assinatura','protocolo','conferencia','deposito','concluido'];
-const OFFNAV={acesso:{p:'analise',n:'analise'},ajuste:{p:'conferencia',n:'conferencia'},sessao:{p:'conferencia',n:'deposito'},'nao-aprovado':{p:'analise',n:'envio'},encerrada:{p:'proposta',n:'envio'}};
+const ORDER=['lista','envio','enviado','recebido','analise','proposta','documentos','contrato','assinatura','protocolo','deposito','concluido'];
+const OFFNAV={acesso:{p:'analise',n:'analise'},'duvida-proposta':{p:'proposta',n:'proposta'},'contestacao-analise':{p:'nao-aprovado',n:'nao-aprovado'},sessao:{p:'protocolo',n:'deposito'},'aguarda-homologacao':{p:'protocolo',n:'deposito'},'homologacao-50':{p:'deposito',n:'concluido'},'complementar-analise':{p:'concluido',n:'complementar-aditivo'},'complementar-aditivo':{p:'complementar-analise',n:'deposito'},'complementar-negado':{p:'complementar-analise',n:'concluido'},'nao-aprovado':{p:'analise',n:'envio'},encerrada:{p:'proposta',n:'envio'}};
 
 let current='lista';
 
@@ -798,11 +981,12 @@ function renderWizard(s){
       <div class="sc-head">
         <span class="badge ${s.badge}"><span class="bdot"></span>${s.badgeTxt}</span>
         ${s.cond?`<span class="cond-tag">◇ Estado condicional</span>`:''}
+        ${s.sugg?`<span class="sugg-tag">◇ Sugestão, a validar</span>`:''}
         ${s.terminal?`<span class="cond-tag" style="border-color:var(--red-500);color:var(--red-900);background:var(--red-50)">● Estado final</span>`:''}
       </div>
       <div class="sc-title">${s.title}</div>
       <div class="sc-prazo">${ic.clock}${s.prazo}</div>
-      <div class="sc-desc">${s.desc}</div>
+      <div class="sc-desc">${typeof s.desc==='function'?s.desc():s.desc}</div>
       ${s.action?s.action():''}
       ${s.sim?s.sim():''}
     </div>
@@ -851,11 +1035,8 @@ const FAQ={
     {q:'É seguro assinar por lá?', a:'Sim. A assinatura é feita em uma plataforma especializada, com validade jurídica.'},
   ],
   protocolo:[
-    {q:'Como eu protocolo as vias?', a:'Você protocola as vias assinadas no seu processo, pelo sistema do tribunal, e depois envia aqui o comprovante do protocolo em PDF.'},
-    {q:'O que é o comprovante do protocolo?', a:'É o documento gerado pelo sistema do tribunal confirmando que as vias foram juntadas ao processo.'},
-  ],
-  ajuste:[
-    {q:'O que preciso corrigir?', a:'A pendência apontada na conferência aparece na tela. Corrija no seu processo e reenvie o comprovante do protocolo.'},
+    {q:'Preciso fazer alguma coisa no protocolo?', a:'Não. A JusCash protocola as vias assinadas do seu processo no sistema do tribunal e confere tudo antes de liberar o pagamento. Você só acompanha o andamento aqui.'},
+    {q:'O que acontece depois do protocolo?', a:'Depois de conferido, o pagamento é liberado, ou você é direcionado para a sessão pública, se o seu caso precisar dela.'},
   ],
   sessao:[
     {q:'O que é a sessão pública?', a:'É uma chamada com o tabelionato para a leitura da minuta e a sua assinatura por certificado digital. É obrigatória em alguns casos e o pagamento sai depois dela.'},
