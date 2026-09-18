@@ -14,8 +14,8 @@
    Estilo HeroUI · Fonte Figtree · Cores JusCash · Dados simulados.
    ============================================================ */
 :root{
-  --primary-50:#AAFFBE; --primary-100:#8AF3A3; --primary-500:#009C46;
-  --primary-600:#008633; --primary-700:#007122; --primary-800:#005C12;
+  --primary-50:#E7F0FE; --primary-100:#C3DBFD; --primary-500:#2F6FEB;
+  --primary-600:#1957D6; --primary-700:#134BB8; --primary-800:#0F3D95;
   --secondary-500:#136CE2; --secondary-600:#105ABC;
   --n-50:#FAFAFA; --n-100:#F5F5F5; --n-200:#E5E5E5; --n-300:#D4D4D4;
   --n-400:#A3A3A3; --n-500:#6D6D6E; --n-600:#525252; --n-700:#404040;
@@ -58,8 +58,16 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 
 /* ---------- App shell ---------- */
 .app{display:flex;min-height:calc(100vh - 44px);max-width:1440px;margin:0 auto;background:var(--bg-white)}
-.sidebar{width:264px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 14px}
-.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
+.sidebar{width:264px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 14px}
+.which-top{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 20px}
+.which-logo{font-size:17px;color:var(--n-900);letter-spacing:-.2px}
+.which-logo b{font-weight:800}
+.which-logo span{font-weight:400;color:var(--n-500)}
+.which-toggle{width:28px;height:28px;border:1px solid var(--n-200);border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--n-400);font-size:13px;cursor:pointer}
+.fin-label{padding:14px 10px 12px;border-top:1px solid var(--n-200);margin-top:2px;display:flex;flex-direction:column;font-size:11px;color:var(--n-400);text-transform:uppercase;letter-spacing:.4px}
+.fin-label b{font-size:15px;color:var(--n-900);text-transform:none;letter-spacing:0;font-weight:700}
+.fin-label .fin-by{margin-top:1px;font-size:11.5px;color:var(--n-400);text-transform:none;letter-spacing:0}
+.fin-label .fin-by b{font-size:11.5px;color:#5B4FE9;font-weight:700}
 .brand .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--primary-600),var(--primary-800));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px}
 .brand .bt b{font-size:15px;color:var(--text-dark);font-weight:800}
 .brand .bt small{display:block;font-size:11px;color:var(--text-soft)}
@@ -67,9 +75,11 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 .side-cta:hover{background:var(--primary-800)}
 .side-menu{display:flex;flex-direction:column;gap:2px}
 .side-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r-sm);color:var(--text-soft);font-size:13.5px;font-weight:600;cursor:pointer}
-.side-item .ic{width:18px;height:18px;opacity:.75}
+.side-item .ic{width:18px;height:18px;opacity:.75;display:inline-flex;align-items:center;justify-content:center}
+.side-item .ic svg{width:16px;height:16px}
 .side-item:hover{background:var(--n-100)}
-.side-item.active{background:var(--primary-50);color:var(--primary-800)}
+.side-item.active{background:#EEECFC;color:#4B3FD1}
+.side-item.active .ic{opacity:1}
 .side-spacer{flex:1}
 .side-foot{border-top:1px solid var(--n-200);padding-top:14px;margin-top:14px}
 
@@ -128,7 +138,8 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 .badge.neutral{background:var(--n-100);color:var(--n-600)}
 .cond-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--yellow-900);background:var(--yellow-50);border:1px dashed var(--yellow-500);padding:4px 10px;border-radius:var(--r-full)}
 .sugg-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#7A4E00;background:#FFF6E0;border:1px dashed #C99A2E;padding:4px 10px;border-radius:var(--r-full)}
-.sugg-note{font-size:12px;color:#7A4E00;background:#FFF6E0;border:1px dashed #C99A2E;border-radius:var(--r-md);padding:8px 12px;margin-top:10px}
+.detail-tag{display:inline-flex;align-items:center;font-size:11px;font-weight:600;color:var(--text-soft);background:var(--n-100);padding:4px 10px;border-radius:var(--r-full)}
+.sugg-note{font-size:12px;color:#7A4E00;background:#FFF6E0;border:1px dashed #C99A2E;border-radius:var(--r-md);padding:8px 12px;margin:10px 0 14px}
 .sc-title{font-size:22px;font-weight:800;margin:10px 0 4px}
 .sc-prazo{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-soft);margin-bottom:14px}
 .sc-prazo .clock{width:15px;height:15px}
@@ -192,7 +203,7 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 .toggle.on .tk::after{left:20px}
 
 /* proposta */
-.proposal{border:1px solid var(--n-200);border-radius:var(--r-md);overflow:hidden;max-width:560px;background:#fff}
+.proposal{border:1px solid var(--n-200);border-radius:var(--r-md);overflow:hidden;background:#fff}
 .proposal .p-top{background:var(--primary-50);padding:18px 20px;border-bottom:1px solid var(--primary-100)}
 .proposal .p-top small{font-size:12px;color:var(--primary-800);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
 .proposal .p-top .val{font-size:30px;font-weight:800;color:var(--primary-800);margin-top:2px}
@@ -250,7 +261,14 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 .tab2{padding:11px 16px;font-size:13.5px;font-weight:700;color:var(--text-soft);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab2:hover{color:var(--text-dark)}
 .tab2.sel{color:var(--primary-800);border-bottom-color:var(--primary-600)}
-.pcards{display:flex;flex-direction:column;gap:12px;max-width:820px}
+.pcards{display:flex;flex-direction:column;gap:12px}
+.pcards .pcard{width:100%;box-sizing:border-box;align-self:stretch}
+.metrics-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.metric-card{flex:1;min-width:220px;background:#fff;border:1px solid var(--n-200);border-radius:var(--r-lg);padding:20px 22px;box-shadow:var(--shadow-xs)}
+.metric-card .m-lbl{display:flex;align-items:center;gap:6px;font-size:14.5px;font-weight:700;color:var(--text-dark)}
+.metric-card .m-lbl svg{width:16px;height:16px;color:var(--text-soft)}
+.metric-card .m-val{font-size:32px;font-weight:800;margin:14px 0 6px;color:var(--text-dark)}
+.metric-card .m-sub{font-size:12.5px;color:var(--text-soft)}
 .pcard{display:flex;align-items:center;gap:18px;background:#fff;border:1px solid var(--n-200);border-radius:var(--r-lg);padding:16px 20px;box-shadow:var(--shadow-xs);cursor:pointer;transition:.12s;min-height:92px}
 .pcard:hover{box-shadow:var(--shadow-md);border-color:var(--n-300)}
 .pcard .pc-main{flex:1;min-width:0}
@@ -310,29 +328,24 @@ body{font-family:'Figtree',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;co
 
 <div class="review-bar">
   <div class="rb-title">Protótipo · Wizard v2<span> · dados simulados</span></div>
-  <div class="rb-strip" id="rb-strip"></div>
   <div class="rb-nav">
     <button onclick="voltarApresentacao()" title="Voltar para onde eu estava (apresentação)">◀ Voltar</button>
-    <button onclick="prevNav()" title="Anterior">‹</button>
-    <button onclick="nextNav()" title="Próximo">›</button>
   </div>
 </div>
 
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="logo">J</div><div class="bt"><b>Financeiro</b><small>por JusCash</small></div></div>
-    <button class="side-cta" onclick="goto('envio')">＋ Nova antecipação</button>
+    <div class="which-top">
+      <div class="which-logo"><b>which</b><span>·doc9</span></div>
+      <div class="which-toggle">▤</div>
+    </div>
+    <div class="fin-label"><b>Financeiro</b><span class="fin-by">por <b>JusCash</b></span></div>
     <nav class="side-menu">
-      <div class="side-item" onclick="goto('lista')"><span class="ic">🏠</span> Início</div>
+      <div class="side-item" onclick="goto('envio')"><span class="ic">💰</span> Antecipe seus honorários</div>
+      <div class="side-item"><span class="ic">💼</span> Meus processos</div>
       <div class="side-item active" onclick="goto('lista')"><span class="ic">📄</span> Antecipações</div>
-      <div class="side-item"><span class="ic">📁</span> Carteira</div>
-      <div class="side-item"><span class="ic">❓</span> Ajuda</div>
     </nav>
     <div class="side-spacer"></div>
-    <div class="side-foot side-menu">
-      <div class="side-item"><span class="ic">⚙️</span> Configurações</div>
-      <div class="side-item"><span class="ic">👤</span> Minha conta</div>
-    </div>
   </aside>
   <main class="content" id="content"></main>
 </div>
@@ -370,7 +383,8 @@ const STEPS=["Recebido","Análise","Proposta","Contrato","Assinatura","Depósito
 
 /* ================= Estado global ================= */
 let uploads={};      // arquivos anexados por chave
-let envio={ cred:null, segredo:false, cashback:false };
+let envio={ cred:null, segredo:false, cashback:false, cashbackValor:'' };
+const CASHBACK_DISPONIVEL=187.40;
 let complementar={tipos:[]};
 let motivoDocumentos=null;
 let depositoContexto='inicial';
@@ -457,7 +471,16 @@ function confirmarSessao(){ sessao.confirmado=true; toast('Horário confirmado',
 /* envio do processo */
 function setCred(c){ envio.cred=c; render(); }
 function toggleSegredo(){ envio.segredo=!envio.segredo; render(); }
-function toggleCashback(){ envio.cashback=!envio.cashback; render(); }
+function toggleCashback(){ envio.cashback=!envio.cashback; if(!envio.cashback) envio.cashbackValor=''; render(); }
+function setCashbackValor(v){
+  let n=parseFloat((v||'').replace(',','.'));
+  if(isNaN(n)) n=0;
+  envio.cashbackValor=v.trim()?v.trim():'';
+  envio.cashbackErro=(n>CASHBACK_DISPONIVEL);
+  render();
+}
+function cashbackTudo(){ envio.cashbackValor=String(CASHBACK_DISPONIVEL).replace('.',','); envio.cashbackErro=false; render(); }
+
 function toggleUnico(){ envio.unico=envio.unico===false?true:false; render(); }
 function submitEnvio(){
   const f=document.getElementById('num_proc');
@@ -475,6 +498,7 @@ function submitEnvio(){
     wrap.classList.add('err'); f.focus(); return;
   }
   if(!envio.cred){ toast('Selecione o crédito','Escolha qual crédito deseja antecipar.'); return; }
+  if(envio.cashback&&envio.cashbackErro){ toast('Valor de cashback inválido','Ajuste o valor de resgate antes de continuar.'); return; }
   wrap.classList.remove('err');
   goto('enviado');
 }
@@ -486,31 +510,31 @@ const LISTA_ROWS=[
   {num:'0005582-90.2022.5.02.0004',trib:'TRT-2',cred:'Crédito do autor',st:'Em análise',badge:'info',go:'analise'},
   {num:'0021144-70.2022.8.16.0001',trib:'TJPR',cred:'Honorários',st:'Aguardando acesso ao processo',badge:'action',go:'acesso'},
   {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Proposta disponível',badge:'success',go:'proposta'},
-  {num:'0018832-11.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Em avaliação (dúvida sobre a proposta)',badge:'info',go:'duvida-proposta',sugg:true},
-  {num:'0023981-77.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Proposta disponível (dúvida respondida)',badge:'success',go:'proposta',fnPre:"duvidaResposta='Sua proposta segue válida, sem alteração no valor ou nas condições. Você pode aceitar ou recusar quando quiser.'",sugg:true},
+  {num:'0018832-11.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Em avaliação',ann:'dúvida sobre a proposta',badge:'info',go:'duvida-proposta',sugg:true},
+  {num:'0023981-77.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Proposta disponível',ann:'dúvida respondida',badge:'success',go:'proposta',fnPre:"duvidaResposta='Sua proposta segue válida, sem alteração no valor ou nas condições. Você pode aceitar ou recusar quando quiser.'",sugg:true},
   {num:'0009921-33.2020.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Aguardando seus documentos',badge:'action',go:'documentos',fnPre:"motivoDocumentos=null"},
-  {num:'0016654-27.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Aguardando seus documentos (documento faltante no contrato)',badge:'action',go:'documentos',fnPre:"motivoDocumentos='Ao preparar seu contrato, identificamos que falta um documento. Envie o arquivo solicitado abaixo para seguirmos.'",sugg:true},
+  {num:'0016654-27.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Aguardando seus documentos',ann:'documento faltante no contrato',badge:'action',go:'documentos',fnPre:"motivoDocumentos='Ao preparar seu contrato, identificamos que falta um documento. Envie o arquivo solicitado abaixo para seguirmos.'",sugg:true},
   {num:'0044210-05.2021.5.02.0011',trib:'TRT-2',cred:'Crédito do autor',st:'Preparando contrato',badge:'info',go:'contrato'},
   {num:'0007733-88.2022.8.26.0114',trib:'TJSP',cred:'Honorários',st:'Aguardando sua assinatura',badge:'action',go:'assinatura'},
+  {num:'0029547-63.2021.8.26.0002',trib:'TJSP',cred:'Honorários',st:'Em avaliação',ann:'contestação de contrato',badge:'info',go:'contestacao-contrato-analise',sugg:true},
   {num:'0012099-40.2021.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Protocolando',badge:'info',go:'protocolo'},
   {num:'0033456-27.2021.8.26.0224',trib:'TJSP',cred:'Honorários',st:'Aguardando a sessão pública',badge:'action',go:'sessao'},
   {num:'0004471-63.2022.5.15.0002',trib:'TRT-15',cred:'Crédito do autor',st:'Depósito em andamento',badge:'info',go:'deposito',fnPre:"depositoContexto='inicial'"},
-  {num:'0067789-31.2021.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Aguardando homologação (2ª parcela, modelo 50%)',badge:'action',go:'homologacao-50',sugg:true},
-  {num:'0088521-19.2020.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Aguardando homologação da cessão (sem depósito antes)',badge:'action',go:'aguarda-homologacao',sugg:true},
+  {num:'0067789-31.2021.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Aguardando homologação',det:'2ª parcela, modelo 50%',badge:'action',go:'homologacao-50',sugg:true},
+  {num:'0088521-19.2020.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Aguardando homologação da cessão',ann:'sem depósito antes',badge:'action',go:'aguarda-homologacao',sugg:true},
   {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Concluído',badge:'success',go:'concluido',eleg:{desagio:false,ir:false}},
-  {num:'0099231-40.2022.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Concluído (elegível a deságio flexível e IR)',badge:'success',go:'concluido',eleg:{desagio:true,ir:true},sugg:true},
+  {num:'0099231-40.2022.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Concluído',ann:'elegível a deságio flexível e IR',badge:'success',go:'concluido',eleg:{desagio:true,ir:true},sugg:true},
   {num:'0055102-84.2022.8.16.0004',trib:'TJPR',cred:'Honorários',st:'Processo não aprovado',badge:'error',go:'nao-aprovado'},
-  {num:'0038814-22.2022.8.16.0004',trib:'TJPR',cred:'Honorários',st:'Em avaliação (contestação da negativa)',badge:'info',go:'contestacao-analise',sugg:true},
+  {num:'0038814-22.2022.8.16.0004',trib:'TJPR',cred:'Honorários',st:'Em avaliação',ann:'contestação da negativa',badge:'info',go:'contestacao-analise',sugg:true},
   {num:'0009921-33.2020.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Negociação encerrada',badge:'neutral',go:'encerrada'},
-  {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Em avaliação (deságio flexível)',badge:'info',go:'complementar-analise',tipos:['desagio'],sugg:true},
-  {num:'0067789-31.2021.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Em avaliação (devolução de IR)',badge:'info',go:'complementar-analise',tipos:['ir'],sugg:true},
-  {num:'0021144-70.2022.8.16.0001',trib:'TJPR',cred:'Honorários',st:'Em avaliação (modelo 50%, homologação)',badge:'info',go:'complementar-analise',tipos:['modelo50'],sugg:true},
-  {num:'0007733-88.2022.8.26.0114',trib:'TJSP',cred:'Honorários',st:'Em avaliação (deságio flexível + devolução de IR)',badge:'info',go:'complementar-analise',tipos:['desagio','ir'],sugg:true},
-  {num:'0005582-90.2022.5.02.0004',trib:'TRT-2',cred:'Crédito do autor',st:'Aguardando assinatura do aditivo (deságio flexível)',badge:'action',go:'complementar-aditivo',tipos:['desagio'],sugg:true},
-  {num:'0012099-40.2021.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Solicitação não aprovada (devolução de IR)',badge:'error',go:'complementar-negado',tipos:['ir'],sugg:true},
+  {num:'0034117-52.2021.8.19.0001',trib:'TJRJ',cred:'Honorários',st:'Em avaliação',ann:'deságio flexível',badge:'info',go:'complementar-analise',tipos:['desagio'],sugg:true},
+  {num:'0067789-31.2021.8.26.0100',trib:'TJSP',cred:'Honorários',st:'Em avaliação',ann:'devolução de IR',badge:'info',go:'complementar-analise',tipos:['ir'],sugg:true},
+  {num:'0021144-70.2022.8.16.0001',trib:'TJPR',cred:'Honorários',st:'Em avaliação',ann:'modelo 50%, homologação',badge:'info',go:'complementar-analise',tipos:['modelo50'],sugg:true},
+  {num:'0007733-88.2022.8.26.0114',trib:'TJSP',cred:'Honorários',st:'Em avaliação',ann:'deságio flexível + devolução de IR',badge:'info',go:'complementar-analise',tipos:['desagio','ir'],sugg:true},
+  {num:'0005582-90.2022.5.02.0004',trib:'TRT-2',cred:'Crédito do autor',st:'Aguardando assinatura do aditivo',ann:'deságio flexível',badge:'action',go:'complementar-aditivo',tipos:['desagio'],sugg:true},
+  {num:'0012099-40.2021.4.03.6100',trib:'TRF-3',cred:'Honorários',st:'Solicitação não aprovada',ann:'devolução de IR',badge:'error',go:'complementar-negado',tipos:['ir'],sugg:true},
 ];
-/* exploração: como uma exceção aparece pro cliente, genérico vs específico (sugestão, ajuda a decidir em reunião) */
-const EXCECAO_EXEMPLO={num:'0067789-31.2021.8.26.0100',trib:'TJSP',cred:'Honorários',go:'homologacao-50'};
+LISTA_ROWS.forEach((r,i)=>{ const d=new Date(2026,8,17); d.setDate(d.getDate()-(i*2+1)); r.upd=d.toLocaleDateString('pt-BR'); });
 
 let listaPage=0;
 const LISTA_PAGE_SIZE=6;
@@ -524,13 +548,30 @@ function screenLista(){
     <div><h1>Antecipações</h1><p>Acompanhe aqui suas antecipações de honorários com a JusCash, do envio do processo até o pagamento.</p></div>
     <button class="btn btn-primary" onclick="goto('envio')">＋ Enviar processo</button>
   </div>
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="m-lbl">Cashback disponível ${ic.info}</div>
+      <div class="m-val">R$ ${CASHBACK_DISPONIVEL.toFixed(2).replace('.',',')}</div>
+      <div class="m-sub">Total resgatado: R$ 0,00</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-lbl">Valor total antecipado ${ic.info}</div>
+      <div class="m-val">R$ 284.650,00</div>
+      <div class="m-sub">Soma de todos os processos já concluídos</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-lbl">Processos em andamento ${ic.info}</div>
+      <div class="m-val">6</div>
+      <div class="m-sub">Enviados e ainda não concluídos ou encerrados</div>
+    </div>
+  </div>
   <div class="pcards">
     ${rows.map(r=>`
       <div class="pcard" onclick="${r.tipos?`setComplementar([${r.tipos.map(t=>`'${t}'`).join(',')}]);`:''}${r.eleg?`setElegivel({${Object.keys(r.eleg).map(k=>`${k}:${r.eleg[k]}`).join(',')}});pagSel={desagio:false,ir:false};homIrSel=false;`:''}${r.fnPre?`${r.fnPre};`:''}goto('${r.go}')">
         <div class="pc-main">
           <div class="pc-num">Processo nº ${r.num}</div>
-          <div class="pc-meta">${r.trib} · ${r.cred}</div>
-          <div class="pc-status"><span class="badge ${r.badge}" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>${r.st}</span>${r.sugg?` <span class="sugg-tag">◇ sugestão</span>`:''}</div>
+          <div class="pc-meta">${r.trib} · ${r.cred} · Atualizado em ${r.upd}</div>
+          <div class="pc-status"><span class="badge ${r.badge}" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>${r.st}</span>${r.det?`<span class="detail-tag">${r.det}</span>`:''}${r.ann?`<span class="sugg-tag">◇ ${r.ann}</span>`:''}${r.sugg?` <span class="sugg-tag">◇ sugestão</span>`:''}</div>
         </div>
         <div class="chev">›</div>
       </div>`).join('')}
@@ -539,30 +580,7 @@ function screenLista(){
   <div class="btn-row" style="justify-content:center;margin-top:14px;gap:6px">
     ${Array.from({length:totalPages}).map((_,i)=>`<button class="page-btn ${i===listaPage?'active':''}" onclick="listaSetPage(${i})">${i+1}</button>`).join('')}
   </div>`:''}
-  <div class="status-card" style="max-width:900px;margin-top:20px">
-    <div class="sc-body">
-      <div class="sc-head"><span class="sugg-tag">◇ Exploração, a decidir em reunião</span></div>
-      <div class="sc-title" style="font-size:15px">Como uma exceção aparece pro cliente</div>
-      <p class="sub" style="margin:2px 0 14px">Duas opções lado a lado para o mesmo caso (processo no modelo 50%, aguardando a homologação), sem escolha feita ainda. A mesma lógica valeria para deságio flexível e devolução de IR.</p>
-      <div style="display:flex;gap:14px;flex-wrap:wrap">
-        <div class="pcard" style="flex:1;min-width:260px;cursor:default">
-          <div class="pc-main">
-            <div class="pc-num">Opção A · genérico</div>
-            <div class="pc-meta">Processo nº ${EXCECAO_EXEMPLO.num} · ${EXCECAO_EXEMPLO.trib}</div>
-            <div class="pc-status"><span class="badge action" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>Pendência</span></div>
-          </div>
-        </div>
-        <div class="pcard" style="flex:1;min-width:260px;cursor:default">
-          <div class="pc-main">
-            <div class="pc-num">Opção B · específico</div>
-            <div class="pc-meta">Processo nº ${EXCECAO_EXEMPLO.num} · ${EXCECAO_EXEMPLO.trib}</div>
-            <div class="pc-status"><span class="badge action" style="padding:3px 10px;font-size:11px"><span class="bdot"></span>Aguardando homologação (2ª parcela, modelo 50%)</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="help-card" style="max-width:820px">
+  <div class="help-card">
     <div class="hc-ic">💬</div>
     <div class="hc-tx"><b>Precisa de ajuda?</b><small>Tire dúvidas sobre antecipação, prazos e o andamento dos seus processos.</small></div>
     <button class="btn btn-outline" onclick="openChat()">Tirar dúvidas</button>
@@ -607,10 +625,26 @@ function screenEnvio(){
     <div class="field">
       <label>Solicitar cashback nesta antecipação?</label>
       <div class="toggle ${envio.cashback?'on':''}" onclick="toggleCashback()"><span class="tk"></span><span>${envio.cashback?'Sim':'Não'}</span></div>
+      ${envio.cashback?`
+      <div style="margin-top:12px;max-width:320px">
+        <p style="font-size:12.5px;color:var(--text-soft);margin:0 0 8px">Você tem <b>R$ ${CASHBACK_DISPONIVEL.toFixed(2).replace('.',',')}</b> disponível de cashback.</p>
+        <div class="field ${envio.cashbackErro?'err':''}" style="margin-bottom:0">
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="text" inputmode="decimal" placeholder="0,00" value="${envio.cashbackValor}" onchange="setCashbackValor(this.value)" style="max-width:140px">
+            <button class="btn btn-outline btn-sm" onclick="cashbackTudo()" type="button">Resgatar tudo</button>
+          </div>
+          <div class="msg">Valor maior que o saldo disponível (R$ ${CASHBACK_DISPONIVEL.toFixed(2).replace('.',',')}). Ajuste o valor para continuar.</div>
+        </div>
+      </div>`:''}
     </div>
     <div class="field">
       <label style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><input type="checkbox" ${envio.unico===false?'checked':''} onchange="toggleUnico()"> <span>Não sou o único advogado habilitado neste processo</span> <span class="sugg-tag">◇ Campo experimental</span></label>
-      ${envio.unico===false?`<div class="sugg-note" style="margin-top:8px">Como há mais de um advogado habilitado, pode ser necessário um documento adicional (ex.: renúncia dos demais). Isso será confirmado com você durante a análise.</div>`:''}
+      ${envio.unico===false?`<div style="margin-top:10px">
+        <div class="sugg-note">Como há mais de um advogado habilitado, é necessário o termo de renúncia (para quem não vai receber nada) ou o termo de ciência (para quem mantém parte do crédito sem antecipar). Você pode anexar agora ou enviar depois, durante a análise.</div>
+        <label class="dropzone" for="f_multiadv" style="margin-top:10px">${ic.up}<div>Arraste o termo ou <b>clique para selecionar</b></div><div class="hint">Opcional agora · PDF, JPG ou PNG, até 20 MB</div></label>
+        <input id="f_multiadv" type="file" hidden onchange="onFile('multiadv')">
+        ${uploads['multiadv']?`<div class="filechip">${ic.check} ${uploads['multiadv'].join(', ')} <span class="x" onclick="clearFile('multiadv')">✕</span></div>`:''}
+      </div>`:''}
     </div>
     <div class="btn-row" style="margin-top:8px">
       <button class="btn btn-primary" onclick="submitEnvio()">${ic.send}Enviar para análise</button>
@@ -643,7 +677,7 @@ function actProposta(){return `
   <div class="action">
     <h3>Sua proposta</h3>
     <p class="sub">Confira o valor e as condições. Se tiver dúvidas antes de decidir, escreva pra gente.</p>
-    ${duvidaResposta?`<div class="sugg-note">◇ Sugestão, a validar · <b>Resposta à sua dúvida:</b> ${duvidaResposta}</div>`:''}
+    ${duvidaResposta?`<div><span class="sugg-tag">◇ Sugestão, a validar</span><div class="alert info" style="margin-top:8px">${ic.info}<div><b>Resposta à sua dúvida:</b> ${duvidaResposta}</div></div></div>`:''}
     <div class="proposal">
       <div class="p-top"><small>Valor a receber</small><div class="val">R$ <span class="ph">••.•••,••</span></div></div>
       <div class="p-rows">
@@ -661,12 +695,15 @@ function actProposta(){return `
     </div>
   </div>`;}
 
-function confirmDuvida(){
+function confirmDuvida(){const k='duvida';
   openModal(`<div class="m-body">
     <h3>Dúvida sobre a proposta</h3>
     <p>Escreva sua dúvida. Se quiser sugerir outro valor ou condição (contraproposta), pode escrever aqui também.</p>
     <div class="sugg-note"><b>◇ Sugestão, a validar:</b> este fluxo ainda depende de alinhamento maior sobre o funcionamento da contestação.</div>
     <div class="field" style="margin-top:12px"><textarea rows="3" placeholder="Escreva sua dúvida ou contraproposta"></textarea></div>
+    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste um anexo ou <b>clique para selecionar</b></div><div class="hint">Opcional · PDF, JPG ou PNG, até 20 MB</div></label>
+    <input id="f_${k}" type="file" hidden onchange="onFile('${k}');confirmDuvida()">
+    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}');confirmDuvida()">✕</span></div>`:''}
     <div class="m-foot">
       <button class="btn btn-outline btn-sm" onclick="closeModal()">Voltar</button>
       <button class="btn btn-primary btn-sm" onclick="closeModal();act('duvida-proposta','Dúvida enviada','Vamos avaliar e te responder por aqui.')">Enviar</button>
@@ -702,12 +739,35 @@ function actDocs(){const k='docs';return `
     </div>
   </div>`;}
 
+let contestacaoContrato=null;
+function confirmContestacaoContrato(){const k='contestcontrato';
+  openModal(`<div class="m-body">
+    <h3>Contestar o contrato</h3>
+    <p>Encontrou algo errado no contrato? Explique o que precisa ser corrigido antes de assinar.</p>
+    <div class="sugg-note"><b>◇ Sugestão, a validar:</b> este fluxo ainda depende de alinhamento maior, parecido com a dúvida sobre a proposta, mas caindo na formalização em vez da análise.</div>
+    <div class="field" style="margin-top:12px"><textarea rows="3" placeholder="Descreva o que precisa ser corrigido no contrato"></textarea></div>
+    <label class="dropzone" for="f_${k}">${ic.up}<div>Arraste um anexo ou <b>clique para selecionar</b></div><div class="hint">Opcional · PDF, JPG ou PNG, até 20 MB</div></label>
+    <input id="f_${k}" type="file" hidden onchange="onFile('${k}');confirmContestacaoContrato()">
+    ${uploads[k]?`<div class="filechip">${ic.check} ${uploads[k].join(', ')} <span class="x" onclick="clearFile('${k}');confirmContestacaoContrato()">✕</span></div>`:''}
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Voltar</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal();contestacaoContrato='enviada';goto('contestacao-contrato-analise')">Enviar contestação</button>
+    </div></div>`);
+}
+function simularRespostaContestacaoContrato(){ contestacaoContrato='O contrato foi corrigido conforme sua contestação. Confira novamente antes de assinar.'; goto('assinatura'); }
+
 function actAssinatura(){return `
   <div class="action">
     <h3>Assinar o contrato</h3>
     <p class="sub">A assinatura é feita em uma plataforma de assinatura externa, com segurança. Ao terminar, você volta para acompanhar o processo aqui.</p>
+    ${contestacaoContrato&&contestacaoContrato!=='enviada'?`<div><span class="sugg-tag">◇ Sugestão, a validar</span><div class="alert info" style="margin-top:8px">${ic.info}<div><b>Resposta à sua contestação:</b> ${contestacaoContrato}</div></div></div>`:''}
     <div class="alert info">${ic.info}<div>Você será direcionado para um site externo (plataforma de assinatura). O acompanhamento continua nesta página.</div></div>
-    <div class="btn-row"><button class="btn btn-primary" onclick="openSign()">${ic.ext}Abrir plataforma de assinatura</button></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="openSign()">${ic.ext}Abrir plataforma de assinatura</button>
+      <button class="btn btn-outline" onclick="toast('Contrato','Abre o contrato para conferência antes de assinar.')">Ver contrato</button>
+      <button class="btn btn-outline" onclick="toast('Download','O contrato foi baixado (PDF).')">Baixar contrato</button>
+      <button class="btn btn-outline" onclick="confirmContestacaoContrato()">Contestar contrato <span class="sugg-tag" style="margin-left:6px">◇ sugestão</span></button>
+    </div>
   </div>`;}
 
 function actSessao(){
@@ -794,7 +854,7 @@ function actNaoAprovado(){return `
   <div class="action">
     ${!contestacaoNegativa?`<div class="btn-row"><button class="btn btn-primary" onclick="goto('envio')">Enviar outro processo</button><button class="btn btn-outline" onclick="confirmContestacaoNegativa()">Contestar <span class="sugg-tag" style="margin-left:6px">◇ sugestão</span></button></div>`:''}
     ${contestacaoNegativa==='respondida'?`
-    <div class="sugg-note" style="margin-top:14px">◇ Sugestão, a validar · <b>Resposta à sua contestação:</b> Reavaliamos o processo com as informações enviadas, mas mantemos o parecer anterior desta vez.</div>
+    <div style="margin-top:14px"><span class="sugg-tag">◇ Sugestão, a validar</span><div class="alert info" style="margin-top:8px">${ic.info}<div><b>Resposta à sua contestação:</b> Reavaliamos o processo com as informações enviadas, mas mantemos o parecer anterior desta vez.</div></div></div>
     <div class="btn-row" style="margin-top:12px"><button class="btn btn-primary" onclick="goto('envio')">Enviar outro processo</button></div>
     `:''}
   </div>`;}
@@ -847,6 +907,11 @@ const STATES=[
     title:'Em avaliação', prazo:'Prazo estimado de resposta: até 3 dias úteis.',
     desc:'Sua contestação sobre o motivo da negativa está em avaliação. Assim que respondermos, o status volta para "Processo não aprovado" com a resposta visível ali.',
     sim:()=>sim('Simular resposta da contestação',[{l:'Responder',t:'',v:'btn-primary',fn:'simularRespostaContestacao()'}]) },
+
+  {group:'cond', id:'contestacao-contrato-analise', step:4, badge:'info', badgeTxt:'Em avaliação', accent:'var(--blue-500)', cond:true, sugg:true,
+    title:'Em avaliação', prazo:'Prazo estimado de resposta: até 3 dias úteis.',
+    desc:'Sua contestação sobre o contrato está em avaliação pela formalização. Assim que respondermos, o status volta para "Aguardando sua assinatura" com a resposta visível ali.',
+    sim:()=>sim('Simular resposta da contestação',[{l:'Responder',t:'',v:'btn-primary',fn:'simularRespostaContestacaoContrato()'}]) },
 
   {group:'cond', id:'documentos', step:2, badge:'action', badgeTxt:'Ação necessária', accent:'var(--orange-500)', cond:true,
     title:'Aguardando seus documentos', prazo:'A formalização continua assim que recebermos os documentos.',
@@ -922,7 +987,7 @@ const byId=id=>STATES.find(s=>s.id===id);
 
 /* navegação linear (prev/próximo) e fallback para estados fora da linha */
 const ORDER=['lista','envio','enviado','recebido','analise','proposta','documentos','contrato','assinatura','protocolo','deposito','concluido'];
-const OFFNAV={acesso:{p:'analise',n:'analise'},'duvida-proposta':{p:'proposta',n:'proposta'},'contestacao-analise':{p:'nao-aprovado',n:'nao-aprovado'},sessao:{p:'protocolo',n:'deposito'},'aguarda-homologacao':{p:'protocolo',n:'deposito'},'homologacao-50':{p:'deposito',n:'concluido'},'complementar-analise':{p:'concluido',n:'complementar-aditivo'},'complementar-aditivo':{p:'complementar-analise',n:'deposito'},'complementar-negado':{p:'complementar-analise',n:'concluido'},'nao-aprovado':{p:'analise',n:'envio'},encerrada:{p:'proposta',n:'envio'}};
+const OFFNAV={acesso:{p:'analise',n:'analise'},'duvida-proposta':{p:'proposta',n:'proposta'},'contestacao-analise':{p:'nao-aprovado',n:'nao-aprovado'},'contestacao-contrato-analise':{p:'assinatura',n:'assinatura'},sessao:{p:'protocolo',n:'deposito'},'aguarda-homologacao':{p:'protocolo',n:'deposito'},'homologacao-50':{p:'deposito',n:'concluido'},'complementar-analise':{p:'concluido',n:'complementar-aditivo'},'complementar-aditivo':{p:'complementar-analise',n:'deposito'},'complementar-negado':{p:'complementar-analise',n:'concluido'},'nao-aprovado':{p:'analise',n:'envio'},encerrada:{p:'proposta',n:'envio'}};
 
 let current='lista';
 let history=[];
@@ -943,19 +1008,6 @@ function prevNav(){
 }
 
 /* ================= Render ================= */
-function renderStrip(){
-  const strip=document.getElementById('rb-strip'); strip.innerHTML='';
-  const groups=[['flow','Fluxo'],['happy','Caminho feliz'],['cond','Condicionais'],['final','Finais']];
-  groups.forEach(([g,label])=>{
-    const gl=document.createElement('span'); gl.className='rb-glabel'; gl.textContent=label; strip.appendChild(gl);
-    STATES.filter(s=>s.group===g).forEach(s=>{
-      const p=document.createElement('div');
-      p.className='rb-pill '+(g==='flow'?'flow':'')+(s.cond?' cond':'')+(s.terminal?' final':'')+(s.id===current?' active':'');
-      p.textContent=s.title; p.onclick=()=>goto(s.id);
-      strip.appendChild(p);
-    });
-  });
-}
 
 function renderStepper(s){
   let h='<div class="stepper">';
@@ -1017,7 +1069,6 @@ function render(){
   } else {
     content.innerHTML=renderWizard(s);
   }
-  renderStrip();
   if(current!==prevId){ window.scrollTo({top:0,behavior:'smooth'}); prevId=current; }
 }
 /* ================= Chat de exemplo (assistente Cashito) ================= */
